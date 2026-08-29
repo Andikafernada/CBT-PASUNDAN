@@ -1,0 +1,263 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String        @id @default(cuid())
+  username          String        @unique
+  password          String
+  plainPassword     String?
+  name              String
+  role              String        @default("STUDENT") // ADMIN, TEACHER, OPERATOR, STUDENT
+  nis               String?
+  email             String?
+  phone             String?
+  groupId           String?
+  group             Group?        @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  isActive          Boolean       @default(true)
+  deviceFingerprint String?
+  lastLoginAt       DateTime?
+  isLoginLocked     Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  examSessions      ExamSession[]
+  teacherAssignments TeacherAssignment[]
+  createdExams      Exam[]        @relation("ExamCreatedBy")
+  createdQuestions  Question[]    @relation("QuestionCreatedBy")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   // LOGIN, LOGOUT, DEVICE_LOCK, RESET_LOGIN, START_EXAM, FINISH_EXAM, PROCTOR_ACTION
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model Group {
+  id          String               @id @default(cuid())
+  code        String               @unique
+  name        String
+  description String?
+  users       User[]
+  examGroups  ExamGroup[]
+  teacherAssignments TeacherAssignment[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+}
+
+// Relasi Guru ↔ Mata Pelajaran & Kelas yang Diampu
+model TeacherAssignment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  groupId   String?
+  group     Group?   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Subject {
+  id          String              @id @default(cuid())
+  code        String              @unique
+  name        String
+  description String?
+  topics      Topic[]
+  exams       Exam[]
+  questions   Question[]
+  teacherAssignments TeacherAssignment[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model Topic {
+  id          String     @id @default(cuid())
+  subjectId   String
+  subject     Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  code        String?
+  name        String
+  description String?
+  questions   Question[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE         // Pilihan Ganda Tunggal
+  COMPLEX_MULTIPLE_CHOICE // Pilihan Ganda Kompleks (Multi Select)
+  TRUE_FALSE              // Benar / Salah
+  MATCHING                // Menjodohkan
+  ESSAY                   // Esai / Isian
+}
+
+model Question {
+  id              String          @id @default(cuid())
+  subjectId       String?         // Direct link to Subject (baru, tanpa perlu topik di UI)
+  subject         Subject?        @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  topicId         String?         // Tetap ada untuk backward-compat, tapi optional
+  topic           Topic?          @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  createdByUserId String?         // Guru yang membuat atau mengimpor soal ini
+  createdBy       User?           @relation("QuestionCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  type            String          @default("MULTIPLE_CHOICE") // QuestionType
+  content         String          @db.LongText // HTML / Markdown / LaTeX math
+  audioUrl        String?
+  videoUrl        String?
+  imageUrl        String?
+  difficulty      String          @default("MEDIUM") // EASY, MEDIUM, HARD
+  points          Float           @default(1.0)
+  isActive        Boolean         @default(true)
+  options         QuestionOption[]
+  matchingPairs   MatchingPair[]
+  examQuestions   ExamQuestion[]
+  answers         ExamAnswer[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([createdByUserId])
+}
+
+model QuestionOption {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  content    String   @db.LongText
+  isCorrect  Boolean  @default(false)
+  orderIndex Int      @default(0)
+}
+
+model MatchingPair {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  premise    String   @db.LongText // Pernyataan / Item Kiri
+  response   String   @db.LongText // Pasangan / Item Kanan
+  orderIndex Int      @default(0)
+}
+
+model Exam {
+  id                    String         @id @default(cuid())
+  title                 String
+  code                  String         @unique
+  description           String?
+  subjectId             String
+  subject               Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  createdByUserId       String?        // Guru yang membuat ujian
+  createdBy             User?          @relation("ExamCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  durationMinutes       Int            @default(60)
+  startTime             DateTime?
+  endTime               DateTime?
+  token                 String?        @default("ZYACBT")
+  isTokenDynamic        Boolean        @default(false)
+  shuffleQuestions      Boolean        @default(true)
+  shuffleOptions        Boolean        @default(true)
+  showResult            Boolean        @default(true)
+  showAnswerKey         Boolean        @default(false)
+  minTimeMinutes        Int            @default(0)
+  maxViolations         Int            @default(3)
+  isPublished           Boolean        @default(false)
+  requireKioskBrowser   Boolean        @default(false)
+  kioskUserAgentPattern String?        @default("Exambro|SafeExamBrowser")
+  // Ujian Susulan
+  isSupplementary       Boolean        @default(false) // Apakah ini ujian susulan?
+  parentExamId          String?        // ID ujian utama (jika ini susulan)
+  examGroups            ExamGroup[]
+  examQuestions         ExamQuestion[]
+  examSessions          ExamSession[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  @@index([parentExamId])
+}
+
+model ExamGroup {
+  id      String @id @default(cuid())
+  examId  String
+  groupId String
+  exam    Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, groupId])
+}
+
+model ExamQuestion {
+  id         String   @id @default(cuid())
+  examId     String
+  questionId String
+  exam       Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  orderIndex Int      @default(0)
+  score      Float    @default(1.0)
+
+  @@unique([examId, questionId])
+}
+
+model ExamSession {
+  id               String         @id @default(cuid())
+  examId           String
+  userId           String
+  exam             Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Status: IN_PROGRESS, COMPLETED, SUSPENDED, TERMINATED, FORCE_FINISHED, TIMEOUT
+  status           String         @default("IN_PROGRESS")
+  finishReason     String?        // SELF, FORCE_BY_ADMIN, TIMEOUT, VIOLATION
+  startedAt        DateTime       @default(now())
+  finishedAt       DateTime?
+  remainingSeconds Int            @default(3600)
+  score            Float?         @default(0.0)
+  totalPossible    Float?         @default(100.0)
+  violationCount   Int            @default(0)
+  ipAddress        String?
+  userAgent        String?
+  answers          ExamAnswer[]
+  violationLogs    ViolationLog[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([examId, userId])
+}
+
+model ExamAnswer {
+  id               String      @id @default(cuid())
+  sessionId        String
+  questionId       String
+  session          ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question         Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOptionIds String?    @db.LongText // JSON string array of selected option IDs
+  textAnswer       String?     @db.LongText // For ESSAY / Short Answer
+  matchingAnswer   String?     @db.LongText // JSON string representing pairs { premiseId: responseId }
+  isDoubtful       Boolean     @default(false) // Ragu-ragu
+  isCorrect        Boolean?
+  scoreAwarded     Float?      @default(0.0)
+  teacherFeedback  String?     @db.LongText
+  answeredAt       DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@unique([sessionId, questionId])
+}
+
+model ViolationLog {
+  id            String      @id @default(cuid())
+  sessionId     String
+  session       ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  violationType String      // TAB_SWITCH, FULLSCREEN_EXIT, MULTIPLE_DEVICE, COPY_PASTE
+  details       String?
+  timestamp     DateTime    @default(now())
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
