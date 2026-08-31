@@ -36,61 +36,24 @@ export async function POST(
       return NextResponse.json({ error: "Ujian sudah selesai dikerjakan" }, { status: 400 });
     }
 
-    const body = await req.json().catch(() => ({}));
-    const { forceSubmit, agreeZero } = body;
+    // Early Submission Lock: Cannot submit if remaining time > 10 minutes (600s) and duration > 10 mins
+    const examDurationMinutes = exam.durationMinutes || 60;
+    const currentRemainingSeconds = session.remainingSeconds ?? 3600;
 
-    // Strict minimum 30 minutes rule (or exam.minTimeMinutes)
-    const requiredMinMinutes = Math.max(exam.minTimeMinutes || 0, 30);
-    const elapsedMinutes = (Date.now() - new Date(session.startedAt).getTime()) / (1000 * 60);
+    if (examDurationMinutes > 10 && currentRemainingSeconds > 600) {
+      const secondsUntilUnlock = currentRemainingSeconds - 600;
+      const minutesUntilUnlock = Math.ceil(secondsUntilUnlock / 60);
 
-    if (elapsedMinutes < requiredMinMinutes) {
-      if (forceSubmit && agreeZero) {
-        // PENALTI NILAI 0 KARENA MEMAKSA KUMPUL SEBELUM 30 MENIT
-        await prisma.examSession.update({
-          where: { id: session.id },
-          data: {
-            status: "COMPLETED",
-            score: 0,
-            finishedAt: new Date(),
-          },
-        });
-
-        // Audit Log
-        await prisma.auditLog.create({
-          data: {
-            userId: user.id,
-            action: "FINISH_EXAM",
-            details: `Siswa memaksa kumpul sebelum 30 menit (pengerjaan: ${Math.floor(elapsedMinutes)} menit). Penalti nilai 0 otomatis diterapkan.`,
-          },
-        }).catch(() => {});
-
-        return NextResponse.json({
-          success: true,
-          isPenaltyZero: true,
-          message: "Ujian dipaksa selesai sebelum 30 menit. Seluruh jawaban tidak dinilai dan skor otomatis 0.",
-          result: {
-            score: 0,
-            totalQuestions: exam.examQuestions.length,
-            correctCount: 0,
-            incorrectCount: exam.examQuestions.length,
-            essayCount: 0,
-            showResult: exam.showResult,
-            finishedAt: new Date(),
-          },
-        });
-      } else {
-        const remainingToMin = Math.ceil(requiredMinMinutes - elapsedMinutes);
-        return NextResponse.json(
-          {
-            error: `Ujian baru dapat diselesaikan setelah minimal ${requiredMinMinutes} menit pengerjaan. Anda baru mengerjakan selama ${Math.floor(elapsedMinutes)} menit (kurang ${remainingToMin} menit lagi).`,
-            underMinTime: true,
-            minMinutes: requiredMinMinutes,
-            elapsedMinutes: Math.floor(elapsedMinutes),
-            remainingToMin,
-          },
-          { status: 400 }
-        );
-      }
+      return NextResponse.json(
+        {
+          error: `Pengumpulan ujian terkunci. Tombol selesaikan ujian baru akan aktif saat sisa waktu pengerjaan 10 menit terakhir (sekitar ${minutesUntilUnlock} menit lagi). Silakan periksa kembali seluruh jawaban Anda.`,
+          isLockedEarly: true,
+          remainingSeconds: currentRemainingSeconds,
+          secondsUntilUnlock,
+          minutesUntilUnlock,
+        },
+        { status: 400 }
+      );
     }
 
     const result: any = await calculateAndFinishSession(session.id, "SELF");

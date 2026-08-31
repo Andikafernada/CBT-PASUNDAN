@@ -26,6 +26,7 @@ import {
   ZoomIn,
   ZoomOut,
   Sparkles,
+  Lock,
 } from "lucide-react";
 
 export default function ExamRoomPage({
@@ -65,7 +66,6 @@ export default function ExamRoomPage({
   // Finish Modal
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [isAgreedFinish, setIsAgreedFinish] = useState(false);
-  const [agreeForceZero, setAgreeForceZero] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [finishError, setFinishError] = useState<string | null>(null);
 
@@ -419,10 +419,10 @@ export default function ExamRoomPage({
   };
 
   const handleAutoSubmit = async () => {
-    await submitExam(false, false);
+    await submitExam();
   };
 
-  const submitExam = async (forceSubmit = false, agreeZero = false) => {
+  const submitExam = async () => {
     setSubmitting(true);
     setFinishError(null);
 
@@ -430,7 +430,7 @@ export default function ExamRoomPage({
       const res = await fetch(`/api/student/exams/${examId}/finish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ forceSubmit, agreeZero }),
+        body: JSON.stringify({}),
       });
 
       const data = await res.json();
@@ -1010,14 +1010,32 @@ export default function ExamRoomPage({
       {showFinishModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-lg w-full shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mx-auto mb-3">
-              <CheckCircle2 className="w-7 h-7" />
-            </div>
+            {(() => {
+              const examDuration = exam?.durationMinutes || 60;
+              const isLockedEarly = examDuration > 10 && remainingSeconds > 600;
 
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white text-center">Konfirmasi Pengakhiran Ujian</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">
-              Periksa ringkasan lembar jawaban Anda dengan cermat sebelum menyelesaikan sesi:
-            </p>
+              return isLockedEarly ? (
+                <>
+                  <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 mx-auto mb-3">
+                    <Lock className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white text-center">Pengumpulan Ujian Belum Dibuka</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">
+                    Berikut ringkasan pengerjaan lembar jawaban Anda saat ini:
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mx-auto mb-3">
+                    <CheckCircle2 className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white text-center">Konfirmasi Pengakhiran Ujian</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">
+                    Periksa ringkasan lembar jawaban Anda dengan cermat sebelum menyelesaikan sesi:
+                  </p>
+                </>
+              );
+            })()}
 
             {/* Answer Statistics Grid */}
             <div className="my-4 grid grid-cols-3 gap-2.5 text-center">
@@ -1054,43 +1072,43 @@ export default function ExamRoomPage({
               </div>
             )}
 
-            {/* 30-MINUTE MINIMUM TIME ENFORCEMENT & WARNING */}
+            {/* 10-MINUTE EARLY SUBMISSION LOCK & COUNTDOWN */}
             {(() => {
-              const elapsedMinutes = session?.startedAt
-                ? Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 60000)
-                : 0;
-              const isUnder30 = elapsedMinutes < 30;
-              const remainingTo30 = Math.max(30 - elapsedMinutes, 1);
+              const examDuration = exam?.durationMinutes || 60;
+              const isLockedEarly = examDuration > 10 && remainingSeconds > 600;
+              const secondsUntilUnlock = Math.max(0, remainingSeconds - 600);
+              const unlockMins = Math.floor(secondsUntilUnlock / 60);
+              const unlockSecs = secondsUntilUnlock % 60;
 
-              if (isUnder30) {
+              if (isLockedEarly) {
                 return (
                   <div className="space-y-4">
-                    {/* Pulsing Critical Warning Box */}
-                    <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/80 border-2 border-rose-500 shadow-lg text-xs space-y-2.5">
-                      <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-black text-sm">
-                        <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
-                        <span>PERINGATAN KERAS: WAKTU KURANG DARI 30 MENIT!</span>
+                    {/* Elegant Lock Box */}
+                    <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/60 shadow-sm text-xs space-y-3">
+                      <div className="flex items-center gap-2.5 text-amber-800 dark:text-amber-300 font-extrabold text-sm">
+                        <Lock className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                        <span>PENGUMPULAN UJIAN BELUM DIBUKA</span>
                       </div>
-                      <p className="text-rose-800 dark:text-rose-200 leading-relaxed font-medium">
-                        Anda baru mengerjakan ujian selama <strong className="text-rose-950 dark:text-white bg-rose-200/60 dark:bg-rose-900/60 px-1.5 py-0.5 rounded">{elapsedMinutes} menit</strong> (batas minimal pengerjaan adalah <strong className="text-rose-950 dark:text-white">30 menit</strong>, kurang <strong className="text-amber-700 dark:text-amber-300">{remainingTo30} menit</strong> lagi).
+                      <p className="text-amber-900 dark:text-amber-200 leading-relaxed font-medium">
+                        Sesuai tata tertib asesmen, lembar jawaban baru dapat diselesaikan dan dikumpulkan saat sisa waktu pengerjaan <strong>10 menit terakhir</strong>.
                       </p>
-                      <div className="p-3 rounded-xl bg-rose-100 dark:bg-rose-900/50 border border-rose-300 dark:border-rose-400/40 text-rose-900 dark:text-rose-100 font-bold leading-relaxed text-[11px]">
-                        🚨 PERHATIAN: Sesuai tata tertib ujian, jika Anda MEMAKSA KELUAR / MENYELESAIKAN ujian saat ini, <u>SELURUH JAWABAN ANDA TIDAK AKAN DISIMPAN</u> DAN <u>NILAI UJIAN OTOMATIS 0 (NOL)</u>!
+                      
+                      {/* Live Countdown Badge */}
+                      <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
+                        <div className="text-slate-600 dark:text-slate-400 font-semibold text-xs flex items-center gap-1.5">
+                          <Clock className="w-4 h-4 text-amber-500 animate-pulse" />
+                          <span>Tombol Selesai Aktif Dalam:</span>
+                        </div>
+                        <div className="font-mono font-extrabold text-base text-amber-600 dark:text-amber-400 bg-amber-100/80 dark:bg-amber-900/40 px-3 py-1 rounded-lg border border-amber-300/60 dark:border-amber-700/60 self-start sm:self-auto">
+                          {unlockMins} Menit {unlockSecs < 10 ? `0${unlockSecs}` : unlockSecs} Detik
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-amber-100/60 dark:bg-amber-900/30 text-amber-950 dark:text-amber-200 text-[11px] leading-relaxed flex items-start gap-2">
+                        <span className="text-sm shrink-0">💡</span>
+                        <span>Silakan manfaatkan sisa waktu ini untuk memeriksa kembali butir soal yang belum dijawab atau bertanda ragu-ragu.</span>
                       </div>
                     </div>
-
-                    {/* Agreement Checkbox for accepting 0 score */}
-                    <label className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-50/60 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/40 hover:border-rose-400 cursor-pointer select-none transition">
-                      <input
-                        type="checkbox"
-                        checked={agreeForceZero}
-                        onChange={(e) => setAgreeForceZero(e.target.checked)}
-                        className="mt-0.5 w-4 h-4 rounded border-rose-500 text-rose-600 focus:ring-rose-500 cursor-pointer"
-                      />
-                      <span className="text-xs text-rose-800 dark:text-rose-200 font-bold leading-relaxed">
-                        Saya mengerti konsekuensinya dan bersedia menerima NILAI 0 (NOL) secara permanen karena mengakhiri ujian sebelum 30 menit.
-                      </span>
-                    </label>
 
                     {finishError && (
                       <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2">
@@ -1099,48 +1117,29 @@ export default function ExamRoomPage({
                       </div>
                     )}
 
-                    {/* Action Buttons for Under 30 Mins */}
-                    <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+                    {/* Action Button: Back to Exam */}
+                    <div className="pt-2">
                       <button
                         type="button"
                         onClick={() => {
                           setShowFinishModal(false);
                           setIsAgreedFinish(false);
-                          setAgreeForceZero(false);
                         }}
-                        className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition text-center shadow-md shadow-blue-600/20"
+                        className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition text-center shadow-md shadow-blue-600/20 flex items-center justify-center gap-2"
                       >
-                        Kembali Mengerjakan Soal
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!agreeForceZero || submitting}
-                        onClick={() => submitExam(true, true)}
-                        className="flex-1 py-3 bg-rose-600 hover:bg-rose-500 text-white font-black text-xs rounded-xl shadow-md shadow-rose-600/30 transition flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        {submitting ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Memproses Penalti...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Paksa Selesai (Nilai 0)</span>
-                            <AlertTriangle className="w-4 h-4" />
-                          </>
-                        )}
+                        <span>Kembali Periksa Lembar Jawaban</span>
                       </button>
                     </div>
                   </div>
                 );
               }
 
-              // Normal Flow (Worked >= 30 Minutes)
+              // Normal Flow (Remaining Time <= 10 Minutes)
               return (
                 <div>
-                  {/* General Irreversibility Notice */}
-                  <div className="mb-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    ℹ️ <strong>Catatan:</strong> Setelah menekan tombol <em>Selesaikan Ujian Sekarang</em>, sesi ujian Anda akan langsung ditutup dan jawaban dikunci permanen.
+                  <div className="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>Waktu pengerjaan telah memasuki 10 menit terakhir. Anda diperkenankan menyelesaikan ujian.</span>
                   </div>
 
                   {/* Mandatory Agreement Checkbox */}
@@ -1152,7 +1151,7 @@ export default function ExamRoomPage({
                       className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                     <span className="text-xs text-slate-700 dark:text-slate-200 font-semibold leading-relaxed">
-                      Saya telah memeriksa seluruh jawaban dengan sungguh-sungguh dan yakin untuk menyelesaikan ujian ini.
+                      Saya telah memeriksa seluruh jawaban dengan teliti dan yakin untuk mengakhiri sesi ujian ini.
                     </span>
                   </label>
 
@@ -1163,7 +1162,7 @@ export default function ExamRoomPage({
                     </div>
                   )}
 
-                  {/* Normal Action Buttons */}
+                  {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row gap-2.5">
                     <button
                       type="button"
@@ -1178,13 +1177,13 @@ export default function ExamRoomPage({
                     <button
                       type="button"
                       disabled={!isAgreedFinish || submitting}
-                      onClick={() => submitExam(false, false)}
+                      onClick={() => submitExam()}
                       className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {submitting ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Menyimpan Nilai...</span>
+                          <span>Menyimpan & Menilai...</span>
                         </>
                       ) : (
                         <>
