@@ -91,7 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navLinks = allNavLinks.filter((item) => item.roles.includes(userRole));
 
   return (
-    <div className="min-h-screen bg-slate-50/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex transition-colors duration-150">
+    <div className="min-h-screen bg-[#f0f6ff] dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex transition-colors duration-150">
       {/* Sidebar for Desktop */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 flex flex-col justify-between transition-transform duration-200 lg:translate-x-0 shadow-sm dark:shadow-none ${
