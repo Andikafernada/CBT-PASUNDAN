@@ -220,6 +220,7 @@ model ExamSession {
   userAgent        String?
   answers          ExamAnswer[]
   violationLogs    ViolationLog[]
+  reflection       StudentReflection?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
@@ -260,4 +261,17 @@ model SystemSetting {
   value       String
   description String?
   updatedAt   DateTime @updatedAt
+}
+
+model StudentReflection {
+  id            String      @id @default(cuid())
+  sessionId     String      @unique
+  session       ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  physicalState String      @default("FIT") // FIT, NORMAL, UNWELL
+  readinessRate Int         @default(5)     // 1 - 5 stars
+  honestyPledge Boolean     @default(true)
+  notes         String?
+  createdAt     DateTime    @default(now())
+
+  @@index([sessionId])
 }

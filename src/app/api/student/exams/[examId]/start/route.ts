@@ -9,7 +9,8 @@ export async function POST(
 ) {
   try {
     const { examId } = await params;
-    const { token } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { token, physicalState, readinessRate, honestyPledge, notes } = body;
     const user = await getSessionUser();
 
     if (!user) {
@@ -172,6 +173,26 @@ export async function POST(
           { status: 403 }
         );
       }
+    }
+
+    // Save Student Reflection if provided
+    if (physicalState || readinessRate) {
+      await prisma.studentReflection.upsert({
+        where: { sessionId: session.id },
+        create: {
+          sessionId: session.id,
+          physicalState: physicalState || "FIT",
+          readinessRate: Number(readinessRate) || 5,
+          honestyPledge: honestyPledge !== false,
+          notes: notes || null,
+        },
+        update: {
+          physicalState: physicalState || "FIT",
+          readinessRate: Number(readinessRate) || 5,
+          honestyPledge: honestyPledge !== false,
+          notes: notes || null,
+        },
+      }).catch((e) => console.error("Reflection save error:", e));
     }
 
     // Map existing answers by questionId

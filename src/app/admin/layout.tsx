@@ -74,6 +74,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       icon: BarChart3,
       roles: ["ADMIN", "TEACHER", "OPERATOR"],
     },
+    {
+      href: "/admin/reports/students",
+      label: "Rekap Pelanggaran Siswa",
+      icon: ShieldAlert,
+      roles: ["ADMIN", "TEACHER", "OPERATOR"],
+    },
     { href: "/admin/students", label: "Peserta & Kelas", icon: Users, roles: ["ADMIN", "OPERATOR"] },
     { href: "/admin/print/cards", label: "Cetak Kartu Peserta", icon: Printer, roles: ["ADMIN", "OPERATOR"] },
     { href: "/admin/print/attendance", label: "Cetak Presensi / Hadir", icon: CheckCircle2, roles: ["ADMIN", "OPERATOR"] },
