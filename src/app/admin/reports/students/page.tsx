@@ -120,14 +120,14 @@ export default function StudentComplianceReportPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Rekap Kedisiplinan & Pelanggaran Siswa
             </h1>
-            <span className="px-2.5 py-0.5 text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-lg">
+            <span className="px-2.5 py-0.5 text-xs font-bold bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 rounded-lg">
               Audit BK & Kesiswaan
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Akumulasi riwayat pelanggaran anti-cheat, keterlambatan login, dan ujian susulan lintas seluruh mata pelajaran.
           </p>
         </div>
@@ -135,9 +135,9 @@ export default function StudentComplianceReportPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={handleExportCSV}
-            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center gap-2 transition"
+            className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-2 shadow-xs transition"
           >
-            <Download className="w-4 h-4 text-emerald-400" />
+            <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>Ekspor CSV / Excel</span>
           </button>
 
@@ -153,53 +153,53 @@ export default function StudentComplianceReportPage() {
 
       {/* Summary Statistics Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
+        <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium mb-2">
             <span>Total Siswa Terdata</span>
-            <Users className="w-4 h-4 text-blue-400" />
+            <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white">
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
             {data?.stats?.totalStudents || 0}
           </div>
-          <div className="text-[11px] text-slate-500 mt-1">Seluruh rombel peserta ujian</div>
+          <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Seluruh rombel peserta ujian</div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
+        <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium mb-2">
             <span>Disiplin & Bersih</span>
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400">
+          <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
             {data?.stats?.lowRiskCount || 0}
           </div>
-          <div className="text-[11px] text-emerald-500/80 mt-1">0 pelanggaran & tepat waktu</div>
+          <div className="text-[11px] text-emerald-600/80 dark:text-emerald-500/80 mt-1">0 pelanggaran & tepat waktu</div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
+        <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium mb-2">
             <span>Perlu Pantauan</span>
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-amber-400">
+          <div className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400">
             {data?.stats?.mediumRiskCount || 0}
           </div>
-          <div className="text-[11px] text-amber-500/80 mt-1">1 - 4x pelanggaran / telat</div>
+          <div className="text-[11px] text-amber-600/80 dark:text-amber-500/80 mt-1">1 - 4x pelanggaran / telat</div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
+        <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium mb-2">
             <span>Risiko Tinggi (BK)</span>
-            <ShieldAlert className="w-4 h-4 text-rose-400" />
+            <ShieldAlert className="w-4 h-4 text-rose-600 dark:text-rose-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-rose-400">
+          <div className="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400">
             {data?.stats?.highRiskCount || 0}
           </div>
-          <div className="text-[11px] text-rose-500/80 mt-1">≥5x pelanggaran / sering susulan</div>
+          <div className="text-[11px] text-rose-600/80 dark:text-rose-500/80 mt-1">≥5x pelanggaran / sering susulan</div>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3">
         <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -207,19 +207,19 @@ export default function StudentComplianceReportPage() {
             placeholder="Cari Nama Siswa atau NIS..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
           />
         </form>
 
         <div className="flex items-center gap-2.5 w-full md:w-auto flex-wrap">
           {/* Class Filter */}
-          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
             <Filter className="w-3.5 h-3.5" />
-            <span>Rombel:</span>
+            <span className="font-semibold">Rombel:</span>
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
-              className="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+              className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:border-blue-500"
             >
               <option value="ALL">Semua Kelas</option>
               {data?.groups?.map((g: any) => (
@@ -231,12 +231,12 @@ export default function StudentComplianceReportPage() {
           </div>
 
           {/* Risk Level Filter */}
-          <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <span>Status Risiko:</span>
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+            <span className="font-semibold">Status Risiko:</span>
             <select
               value={selectedRisk}
               onChange={(e) => setSelectedRisk(e.target.value)}
-              className="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+              className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:border-blue-500"
             >
               <option value="ALL">Semua Tingkat</option>
               <option value="HIGH">Risiko Tinggi (≥5x / Telat)</option>
@@ -248,10 +248,10 @@ export default function StudentComplianceReportPage() {
       </div>
 
       {/* Student Aggregated Table */}
-      <div className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shadow-sm">
+      <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950 text-slate-400 border-b border-slate-800">
+            <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="py-3.5 px-4 font-bold">Identitas Siswa</th>
                 <th className="py-3.5 px-4 font-bold">Kelas / Rombel</th>
@@ -262,19 +262,19 @@ export default function StudentComplianceReportPage() {
                 <th className="py-3.5 px-4 font-bold text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500">
-                    <div className="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-2" />
-                    <p>Memuat rekapitulasi audit siswa...</p>
+                  <td colSpan={7} className="py-12 text-center text-slate-400 dark:text-slate-500">
+                    <div className="inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mb-2" />
+                    <p className="font-semibold">Memuat rekapitulasi audit siswa...</p>
                   </td>
                 </tr>
               ) : !data?.students || data.students.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500">
-                    <AlertCircle className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                    <p className="font-semibold">Tidak Ada Data Siswa yang Sesuai Filter</p>
+                  <td colSpan={7} className="py-12 text-center text-slate-400 dark:text-slate-500">
+                    <AlertCircle className="w-8 h-8 text-slate-400 dark:text-slate-600 mx-auto mb-2" />
+                    <p className="font-bold text-slate-700 dark:text-slate-300">Tidak Ada Data Siswa yang Sesuai Filter</p>
                   </td>
                 </tr>
               ) : (
@@ -285,21 +285,21 @@ export default function StudentComplianceReportPage() {
                   return (
                     <tr
                       key={student.id}
-                      className="hover:bg-slate-800/40 transition cursor-pointer"
+                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition cursor-pointer"
                       onClick={() => setSelectedStudent(student)}
                     >
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-white text-sm">{student.name}</div>
-                        <div className="text-[11px] text-slate-400 font-mono">NIS: {student.nis}</div>
+                        <div className="font-bold text-slate-900 dark:text-white text-sm">{student.name}</div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">NIS: {student.nis}</div>
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <span className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700">
                           {student.groupName}
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-4 text-center font-bold text-slate-300">
+                      <td className="py-3.5 px-4 text-center font-bold text-slate-700 dark:text-slate-300">
                         {student.totalCompleted} Mapel
                       </td>
 
@@ -308,15 +308,15 @@ export default function StudentComplianceReportPage() {
                           <span
                             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-black text-xs ${
                               student.totalViolations >= 5
-                                ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                                : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                ? "bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30"
+                                : "bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30"
                             }`}
                           >
                             <AlertTriangle className="w-3 h-3" />
                             <span>{student.totalViolations}x Strike</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[11px]">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 font-bold text-[11px]">
                             <CheckCircle2 className="w-3 h-3" />
                             <span>0 (Bersih)</span>
                           </span>
@@ -326,17 +326,17 @@ export default function StudentComplianceReportPage() {
                       <td className="py-3.5 px-4 text-center">
                         <div className="flex flex-col items-center gap-1">
                           {student.totalLateCount > 0 && (
-                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20">
                               {student.totalLateCount}x Telat Login
                             </span>
                           )}
                           {student.totalSupplementaryCount > 0 && (
-                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/20">
                               {student.totalSupplementaryCount}x Susulan
                             </span>
                           )}
                           {student.totalLateCount === 0 && student.totalSupplementaryCount === 0 && (
-                            <span className="text-[11px] text-slate-500 font-medium">Selalu Tepat Waktu</span>
+                            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">Selalu Tepat Waktu</span>
                           )}
                         </div>
                       </td>
@@ -347,11 +347,11 @@ export default function StudentComplianceReportPage() {
                             Risiko Tinggi (BK)
                           </span>
                         ) : isMedium ? (
-                          <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-[10px]">
+                          <span className="px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 font-bold text-[10px]">
                             Perlu Pantauan
                           </span>
                         ) : (
-                          <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-[10px]">
+                          <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold text-[10px]">
                             Disiplin
                           </span>
                         )}
@@ -363,7 +363,7 @@ export default function StudentComplianceReportPage() {
                             e.stopPropagation();
                             setSelectedStudent(student);
                           }}
-                          className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-400 font-bold text-xs inline-flex items-center gap-1.5 transition"
+                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-blue-600 dark:text-blue-400 font-bold text-xs inline-flex items-center gap-1.5 transition"
                         >
                           <span>Rincian</span>
                           <ChevronRight className="w-3.5 h-3.5" />
@@ -380,29 +380,29 @@ export default function StudentComplianceReportPage() {
 
       {/* Student Subject Breakdown & Violation Timeline Modal */}
       {selectedStudent && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setSelectedStudent(null)}
-              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-lg"
+              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Modal Student Header */}
-            <div className="flex items-start gap-3.5 mb-6 pb-4 border-b border-slate-800">
+            <div className="flex items-start gap-3.5 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-blue-600/30 shrink-0">
                 {selectedStudent.name?.charAt(0) || "S"}
               </div>
               <div>
-                <h3 className="font-extrabold text-lg text-white">{selectedStudent.name}</h3>
-                <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                  <span>NIS: <strong className="text-slate-200">{selectedStudent.nis}</strong></span>
+                <h3 className="font-extrabold text-lg text-slate-900 dark:text-white">{selectedStudent.name}</h3>
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  <span>NIS: <strong className="text-slate-800 dark:text-slate-200">{selectedStudent.nis}</strong></span>
                   <span>•</span>
-                  <span>Rombel: <strong className="text-slate-200">{selectedStudent.groupName}</strong></span>
+                  <span>Rombel: <strong className="text-slate-800 dark:text-slate-200">{selectedStudent.groupName}</strong></span>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
                     Total Akumulasi: {selectedStudent.totalViolations}x Pelanggaran
                   </span>
                   {selectedStudent.riskLevel === "HIGH" && (
@@ -416,13 +416,13 @@ export default function StudentComplianceReportPage() {
 
             {/* Subject-by-Subject Audit Breakdown */}
             <div className="space-y-4">
-              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-blue-400" />
+              <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span>Rincian Riwayat per Mata Pelajaran ({selectedStudent.subjectBreakdowns?.length || 0})</span>
               </h4>
 
               {selectedStudent.subjectBreakdowns?.length === 0 ? (
-                <div className="p-6 text-center rounded-2xl bg-slate-950 border border-slate-800 text-slate-500 text-xs">
+                <div className="p-6 text-center rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-500 text-xs">
                   Siswa ini belum memulai mata pelajaran ujian apa pun.
                 </div>
               ) : (
@@ -430,61 +430,61 @@ export default function StudentComplianceReportPage() {
                   return (
                     <div
                       key={idx}
-                      className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3"
+                      className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 space-y-3"
                     >
                       {/* Subject Header */}
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-extrabold text-sm text-white">{sub.subjectName}</span>
-                            <span className="text-[11px] text-slate-400 font-mono">({sub.examTitle})</span>
+                            <span className="font-extrabold text-sm text-slate-900 dark:text-white">{sub.subjectName}</span>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">({sub.examTitle})</span>
                           </div>
-                          <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-2">
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
                             <span>Jadwal: {formatDate(sub.scheduledStart)} ({formatTimestamp(sub.scheduledStart)})</span>
                             <span>•</span>
-                            <span>Mulai Nyata: <strong className="text-slate-200">{formatDate(sub.actualStart)} {formatTimestamp(sub.actualStart)}</strong></span>
+                            <span>Mulai Nyata: <strong className="text-slate-800 dark:text-slate-200">{formatDate(sub.actualStart)} {formatTimestamp(sub.actualStart)}</strong></span>
                           </div>
                         </div>
 
                         <div className="text-right">
-                          <div className="text-sm font-extrabold text-emerald-400">
+                          <div className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
                             Skor: {sub.score ?? "-"}
                           </div>
-                          <span className="text-[10px] text-slate-500 font-semibold uppercase">
+                          <span className="text-[10px] text-slate-400 font-semibold uppercase">
                             {sub.status}
                           </span>
                         </div>
                       </div>
 
                       {/* Badges: Time & Violations */}
-                      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-900 text-xs">
+                      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-900 text-xs">
                         {sub.timeStatus === "SUPPLEMENTARY" ? (
-                          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30">
                             🟣 Ujian Susulan (Beda Hari)
                           </span>
                         ) : sub.timeStatus === "LATE" ? (
-                          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
                             🟡 Terlambat Login ({sub.lateMinutes} Menit)
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
                             🟢 Tepat Waktu
                           </span>
                         )}
 
                         {sub.violationCount > 0 ? (
-                          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30">
                             🔴 {sub.violationCount}x Pelanggaran
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                          <span className="px-2 py-0.5 text-[10px] font-semibold text-slate-400">
                             0 Pelanggaran
                           </span>
                         )}
 
                         {/* Student Reflection Info */}
                         {sub.reflection && (
-                          <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                          <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/20">
                             Kondisi Fisik: {sub.reflection.physicalState === "FIT" ? "🔥 Fit" : sub.reflection.physicalState === "UNWELL" ? "🩹 Kurang Fit" : "😊 Cukup"} • Kesiapan: {sub.reflection.readinessRate}⭐
                           </span>
                         )}
@@ -492,11 +492,11 @@ export default function StudentComplianceReportPage() {
 
                       {/* Timestamped Violation Logs */}
                       {sub.violations && sub.violations.length > 0 && (
-                        <div className="mt-2 p-3 rounded-xl bg-rose-950/20 border border-rose-500/20 space-y-1 text-[11px]">
-                          <div className="font-bold text-rose-400 text-xs mb-1">Kronologi Pelanggaran Layar:</div>
+                        <div className="mt-2 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/20 space-y-1 text-[11px]">
+                          <div className="font-bold text-rose-700 dark:text-rose-400 text-xs mb-1">Kronologi Pelanggaran Layar:</div>
                           {sub.violations.map((v: any, vIdx: number) => (
-                            <div key={vIdx} className="text-slate-300 flex items-start gap-1.5">
-                              <span className="font-mono text-rose-400 font-bold">[{formatTimestamp(v.timestamp)}]</span>
+                            <div key={vIdx} className="text-slate-700 dark:text-slate-300 flex items-start gap-1.5">
+                              <span className="font-mono text-rose-600 dark:text-rose-400 font-bold">[{formatTimestamp(v.timestamp)}]</span>
                               <span>{v.details || v.type}</span>
                             </div>
                           ))}
@@ -508,10 +508,10 @@ export default function StudentComplianceReportPage() {
               )}
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-800 flex justify-end">
+            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
               <button
                 onClick={() => setSelectedStudent(null)}
-                className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition"
+                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-white font-bold text-xs transition"
               >
                 Tutup
               </button>

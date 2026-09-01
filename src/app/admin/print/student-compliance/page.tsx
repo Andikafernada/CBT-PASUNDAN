@@ -53,17 +53,17 @@ export default function PrintStudentCompliancePage() {
   return (
     <div className="space-y-6">
       {/* Control Header - Hidden when printing */}
-      <div className="print:hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="print:hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/reports/students"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition"
+            className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition shadow-xs"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">Cetak Berita Acara Kedisiplinan Siswa</h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Cetak Berita Acara Kedisiplinan Siswa</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Format cetak resmi rekapitulasi pelanggaran dan keterlambatan untuk BK & Kesiswaan (A4 Baku).
             </p>
           </div>
@@ -75,7 +75,7 @@ export default function PrintStudentCompliancePage() {
             className={`p-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
               showConfig
                 ? "bg-purple-600 text-white border-purple-500"
-                : "bg-slate-900 text-slate-300 border-slate-800 hover:text-white"
+                : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-xs"
             }`}
           >
             <Settings2 className="w-4 h-4" />
@@ -85,7 +85,7 @@ export default function PrintStudentCompliancePage() {
           <select
             value={selectedGroup}
             onChange={(e) => setSelectedGroup(e.target.value)}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none focus:border-blue-500 font-semibold"
+            className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-blue-500 font-semibold shadow-xs"
           >
             <option value="ALL">Semua Rombel</option>
             {groups.map((g) => (
@@ -97,7 +97,7 @@ export default function PrintStudentCompliancePage() {
 
           <button
             onClick={handlePrint}
-            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-600/30 transition"
+            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-600/20 transition"
           >
             <Printer className="w-4 h-4" />
             <span>Cetak Dokumen (Ctrl+P)</span>
@@ -107,34 +107,34 @@ export default function PrintStudentCompliancePage() {
 
       {/* Config Drawer (Hidden when printing) */}
       {showConfig && (
-        <div className="print:hidden p-4 rounded-2xl bg-slate-900 border border-slate-800 text-xs space-y-3">
-          <div className="font-bold text-white mb-1">Pengaturan Informasi Dokumen:</div>
+        <div className="print:hidden p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-xs space-y-3 shadow-xs">
+          <div className="font-bold text-slate-900 dark:text-white mb-1">Pengaturan Informasi Dokumen:</div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="text-slate-400 block mb-1">Nama Sekolah</label>
+              <label className="text-slate-500 dark:text-slate-400 block mb-1">Nama Sekolah</label>
               <input
                 type="text"
                 value={schoolName}
                 onChange={(e) => setSchoolName(e.target.value)}
-                className="w-full p-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-semibold"
+                className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white font-semibold"
               />
             </div>
             <div>
-              <label className="text-slate-400 block mb-1">Koordinator BK / Kesiswaan</label>
+              <label className="text-slate-500 dark:text-slate-400 block mb-1">Koordinator BK / Kesiswaan</label>
               <input
                 type="text"
                 value={bkCoordinator}
                 onChange={(e) => setBkCoordinator(e.target.value)}
-                className="w-full p-2 bg-slate-950 border border-slate-800 rounded-lg text-white"
+                className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white"
               />
             </div>
             <div>
-              <label className="text-slate-400 block mb-1">Nama Proktor Utama</label>
+              <label className="text-slate-500 dark:text-slate-400 block mb-1">Nama Proktor Utama</label>
               <input
                 type="text"
                 value={proctorName}
                 onChange={(e) => setProctorName(e.target.value)}
-                className="w-full p-2 bg-slate-950 border border-slate-800 rounded-lg text-white"
+                className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white"
               />
             </div>
           </div>
