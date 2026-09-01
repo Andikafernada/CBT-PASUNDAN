@@ -160,21 +160,21 @@ export default function ImportQuestionsPage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
             <Link
               href="/admin/questions"
-              className="text-xs font-semibold text-slate-400 hover:text-blue-400 flex items-center gap-1 transition"
+              className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-400 flex items-center gap-1 transition"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Kembali ke Bank Soal</span>
             </Link>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">
             Import Bank Soal Microsoft Word (.docx)
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Unggah dokumen Microsoft Word (.docx) untuk memasukkan berbagai bentuk soal (PG, Pilihan Ganda Kompleks, Benar/Salah, Menjodohkan, Esai).
           </p>
         </div>
@@ -192,15 +192,15 @@ export default function ImportQuestionsPage() {
       </div>
 
       {/* Target Topic Selection */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
         <div>
-          <label className="block text-xs font-bold text-white uppercase tracking-wider mb-2">
+          <label className="block text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">
             1. Pilih Mata Pelajaran Tujuan:
           </label>
           <select
             value={selectedSubjectId}
             onChange={(e) => setSelectedSubjectId(e.target.value)}
-            className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-semibold"
+            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 font-semibold"
           >
             <option value="">-- Pilih Mata Pelajaran --</option>
             {subjects.map((s) => (
@@ -211,10 +211,10 @@ export default function ImportQuestionsPage() {
 
         {/* Upload Box */}
         <div>
-          <label className="block text-xs font-bold text-white uppercase tracking-wider mb-2">
+          <label className="block text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">
             2. Unggah File Dokumen Soal (.docx):
           </label>
-          <div className="border-2 border-dashed border-slate-700 hover:border-blue-500/60 rounded-2xl p-8 text-center transition bg-slate-950/40 relative">
+          <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500/60 rounded-2xl p-8 text-center transition bg-slate-950/40 relative">
             <input
               type="file"
               accept=".docx"
@@ -226,10 +226,10 @@ export default function ImportQuestionsPage() {
                 <Upload className="w-7 h-7" />
               </div>
               <div>
-                <p className="text-sm font-bold text-white">
+                <p className="text-sm font-bold text-slate-900 dark:text-white">
                   {file ? file.name : "Klik atau seret file Word (.docx) ke sini"}
                 </p>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   Mendukung soal PG, PG Kompleks, Benar/Salah, Menjodohkan, Esai, dan Rumus Matematika KaTeX ($f(x)=2x^2+5$)
                 </p>
               </div>
@@ -284,12 +284,12 @@ export default function ImportQuestionsPage() {
       {/* Preview Parsed Questions */}
       {parsedQuestions.length > 0 && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+          <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-lg">
             <div>
-              <div className="text-sm font-bold text-white">
+              <div className="text-sm font-bold text-slate-900 dark:text-white">
                 Hasil Analisis: {parsedQuestions.length} Butir Soal Terdeteksi
               </div>
-              <div className="text-xs text-slate-400 mt-0.5">
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Review butir soal, tipe soal, dan kunci jawaban sebelum disimpan ke database.
               </div>
             </div>
@@ -297,7 +297,7 @@ export default function ImportQuestionsPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setParsedQuestions([])}
-                className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+                className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
               >
                 Batal
               </button>
@@ -325,14 +325,14 @@ export default function ImportQuestionsPage() {
             {parsedQuestions.map((q, idx) => (
               <div
                 key={idx}
-                className="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition shadow-lg space-y-3"
+                className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-200 dark:border-slate-700 transition shadow-lg space-y-3"
               >
                 <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5 text-xs">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-blue-400">Soal Nomor {q.number || idx + 1}</span>
                     {getTypeBadge(q.type)}
                   </div>
-                  <span className="text-slate-400 font-semibold">
+                  <span className="text-slate-500 dark:text-slate-400 font-semibold">
                     Kunci Jawaban: <strong className="text-emerald-400">{q.correctAnswer || "Esai/Terlampir"}</strong>
                   </span>
                 </div>
@@ -350,7 +350,7 @@ export default function ImportQuestionsPage() {
                         className={`p-2.5 rounded-xl border flex items-start gap-2 text-xs ${
                           opt.isCorrect
                             ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 font-semibold"
-                            : "bg-slate-950/60 border-slate-800 text-slate-400"
+                            : "bg-slate-950/60 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400"
                         }`}
                       >
                         <span className="font-bold">{opt.label || String.fromCharCode(65 + optIdx)}.</span>
@@ -366,14 +366,14 @@ export default function ImportQuestionsPage() {
                 {/* Render Matching Pairs if Matching */}
                 {q.matchingPairs && q.matchingPairs.length > 0 && (
                   <div className="space-y-1.5 pt-1">
-                    <div className="text-xs font-bold text-slate-400">Pasangan Menjodohkan:</div>
+                    <div className="text-xs font-bold text-slate-500 dark:text-slate-400">Pasangan Menjodohkan:</div>
                     <div className="grid grid-cols-1 gap-1.5">
                       {q.matchingPairs.map((pair: any, pIdx: number) => (
                         <div
                           key={pIdx}
-                          className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs flex items-center justify-between gap-4"
+                          className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-xs flex items-center justify-between gap-4"
                         >
-                          <span className="font-semibold text-white">{pair.premise}</span>
+                          <span className="font-semibold text-slate-900 dark:text-white">{pair.premise}</span>
                           <span className="text-slate-500">➔</span>
                           <span className="text-indigo-300 font-semibold">{pair.response}</span>
                         </div>

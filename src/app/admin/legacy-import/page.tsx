@@ -64,8 +64,8 @@ export default function LegacyImportPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black text-white tracking-tight">Migrasi Database ZYACBT Legacy</h1>
-        <p className="text-xs text-slate-400 mt-1">
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Migrasi Database ZYACBT Legacy</h1>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Import otomatis bank soal, mata pelajaran, topik, dan akun peserta dari file dump SQL ZYACBT lama.
         </p>
       </div>
@@ -74,7 +74,7 @@ export default function LegacyImportPage() {
       <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3 text-xs text-blue-300">
         <Sparkles className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
         <div className="leading-relaxed">
-          <span className="font-bold text-white">Kompatibilitas Penuh:</span> Parser modern ini secara otomatis membaca tabel `cbt_modul`, `cbt_topik`, `cbt_soal`, `cbt_jawaban`, `cbt_user`, dan mengonversinya ke skema modern ZYACBT Next-Gen.
+          <span className="font-bold text-slate-900 dark:text-white">Kompatibilitas Penuh:</span> Parser modern ini secara otomatis membaca tabel `cbt_modul`, `cbt_topik`, `cbt_soal`, `cbt_jawaban`, `cbt_user`, dan mengonversinya ke skema modern ZYACBT Next-Gen.
         </div>
       </div>
 
@@ -86,30 +86,30 @@ export default function LegacyImportPage() {
       )}
 
       {/* Upload or Paste SQL */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="font-bold text-sm text-white">Pilih File Dump Database (.sql)</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h3 className="font-bold text-sm text-slate-900 dark:text-white">Pilih File Dump Database (.sql)</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               File `zyacbt-public-2024-05-05-tanpa-database.sql` atau file backup ZYACBT lainnya.
             </p>
           </div>
 
-          <label className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold cursor-pointer transition border border-slate-700">
+          <label className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold cursor-pointer transition border border-slate-200 dark:border-slate-700">
             <span>Pilih File .SQL</span>
             <input type="file" accept=".sql" onChange={handleFileChange} className="hidden" />
           </label>
         </div>
 
         {file && (
-          <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+          <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 flex items-center justify-between">
             <span className="font-mono">{file.name}</span>
             <span className="text-slate-500">{(file.size / 1024).toFixed(1)} KB</span>
           </div>
         )}
 
         <div>
-          <label className="block text-xs font-semibold text-slate-400 mb-1.5">
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
             Atau Tempel / Review Skrip SQL Dump di bawah:
           </label>
           <textarea
@@ -117,7 +117,7 @@ export default function LegacyImportPage() {
             value={sqlText}
             onChange={(e) => setSqlText(e.target.value)}
             placeholder="INSERT INTO `cbt_soal` ... ; INSERT INTO `cbt_jawaban` ... ;"
-            className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl font-mono text-[11px] text-slate-300 focus:outline-none focus:border-blue-500 leading-relaxed resize-y"
+            className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl font-mono text-[11px] text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500 leading-relaxed resize-y"
           />
         </div>
 
@@ -149,21 +149,21 @@ export default function LegacyImportPage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-center">
-              <div className="text-xl font-black text-white">{stats.topics}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Topik Termigrasi</div>
+            <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+              <div className="text-xl font-black text-slate-900 dark:text-white">{stats.topics}</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Topik Termigrasi</div>
             </div>
-            <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-center">
+            <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
               <div className="text-xl font-black text-blue-400">{stats.questions}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Butir Soal</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Butir Soal</div>
             </div>
-            <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-center">
+            <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
               <div className="text-xl font-black text-emerald-400">{stats.options}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Opsi Jawaban</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Opsi Jawaban</div>
             </div>
-            <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-center">
+            <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
               <div className="text-xl font-black text-amber-400">{stats.users}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Akun Siswa</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Akun Siswa</div>
             </div>
           </div>
 

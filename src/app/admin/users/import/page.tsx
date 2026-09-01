@@ -154,21 +154,21 @@ export default function BulkUserImportPage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
             <Link
               href="/admin/users"
-              className="text-xs font-semibold text-slate-400 hover:text-blue-400 flex items-center gap-1 transition"
+              className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-400 flex items-center gap-1 transition"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Kembali ke Manajemen Pengguna</span>
             </Link>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">
             Import Akun Guru, Siswa, & Operator Masal
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Unggah file Excel (.xlsx / .xls) untuk mendaftarkan ratusan akun guru, siswa, dan proktor sekaligus dalam hitungan detik.
           </p>
         </div>
@@ -183,8 +183,8 @@ export default function BulkUserImportPage() {
       </div>
 
       {/* Upload Box */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-        <div className="border-2 border-dashed border-slate-700 hover:border-blue-500/60 rounded-2xl p-8 text-center transition bg-slate-950/40 relative">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500/60 rounded-2xl p-8 text-center transition bg-slate-950/40 relative">
           <input
             type="file"
             accept=".xlsx, .xls, .csv"
@@ -196,10 +196,10 @@ export default function BulkUserImportPage() {
               <FileSpreadsheet className="w-7 h-7" />
             </div>
             <div>
-              <p className="text-sm font-bold text-white">
+              <p className="text-sm font-bold text-slate-900 dark:text-white">
                 {file ? file.name : "Klik atau seret file Excel (.xlsx / .xls) ke sini"}
               </p>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 {file
                   ? `${(file.size / 1024).toFixed(1)} KB • ${previewRows.length} baris data terdeteksi`
                   : "Mendukung format kolom standar: Username, Password, Nama, Role, Kelas, NIS, Email"}
@@ -211,13 +211,13 @@ export default function BulkUserImportPage() {
         {/* Default Role Fallback */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-950/60 rounded-xl border border-slate-800/80">
           <div>
-            <div className="text-xs font-bold text-white">Peran Default (Bila kolom Role kosong di Excel)</div>
-            <div className="text-[11px] text-slate-400">Pilih role default jika file tidak menentukan kolom &apos;Role&apos;.</div>
+            <div className="text-xs font-bold text-slate-900 dark:text-white">Peran Default (Bila kolom Role kosong di Excel)</div>
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">Pilih role default jika file tidak menentukan kolom &apos;Role&apos;.</div>
           </div>
           <select
             value={defaultRole}
             onChange={(e) => setDefaultRole(e.target.value)}
-            className="px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white font-semibold focus:outline-none focus:border-blue-500"
+            className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-blue-500"
           >
             <option value="TEACHER">GURU / PENGUJI (TEACHER)</option>
             <option value="STUDENT">SISWA PESERTA (STUDENT)</option>
@@ -234,7 +234,7 @@ export default function BulkUserImportPage() {
                 setFile(null);
                 setPreviewRows([]);
               }}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
             >
               Reset File
             </button>
@@ -259,15 +259,15 @@ export default function BulkUserImportPage() {
           </div>
           <div className="grid grid-cols-3 gap-3 text-xs pt-1">
             <div className="p-3 bg-slate-900/60 rounded-xl border border-emerald-500/20">
-              <div className="text-slate-400">Total Baris:</div>
-              <div className="font-bold text-white text-base mt-0.5">{importResult.totalRows}</div>
+              <div className="text-slate-500 dark:text-slate-400">Total Baris:</div>
+              <div className="font-bold text-slate-900 dark:text-white text-base mt-0.5">{importResult.totalRows}</div>
             </div>
             <div className="p-3 bg-slate-900/60 rounded-xl border border-emerald-500/20">
-              <div className="text-slate-400">Akun Baru Dibuat:</div>
+              <div className="text-slate-500 dark:text-slate-400">Akun Baru Dibuat:</div>
               <div className="font-bold text-emerald-400 text-base mt-0.5">{importResult.createdCount}</div>
             </div>
             <div className="p-3 bg-slate-900/60 rounded-xl border border-emerald-500/20">
-              <div className="text-slate-400">Akun Diperbarui:</div>
+              <div className="text-slate-500 dark:text-slate-400">Akun Diperbarui:</div>
               <div className="font-bold text-blue-400 text-base mt-0.5">{importResult.updatedCount}</div>
             </div>
           </div>
@@ -287,18 +287,18 @@ export default function BulkUserImportPage() {
 
       {/* Preview Table */}
       {previewRows.length > 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl space-y-3 p-5">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl space-y-3 p-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <FileCheck className="w-4 h-4 text-blue-400" />
               <span>Preview Data Excel ({previewRows.length} Baris)</span>
             </h3>
-            <span className="text-xs text-slate-400">Periksa kolom sebelum menekan tombol simpan</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Periksa kolom sebelum menekan tombol simpan</span>
           </div>
 
-          <div className="overflow-x-auto max-h-96 border border-slate-800 rounded-xl">
+          <div className="overflow-x-auto max-h-96 border border-slate-200 dark:border-slate-800 rounded-xl">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-slate-400 sticky top-0 border-b border-slate-800">
+              <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 sticky top-0 border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th className="py-2.5 px-3">No</th>
                   <th className="py-2.5 px-3">Username</th>
@@ -321,7 +321,7 @@ export default function BulkUserImportPage() {
                   return (
                     <tr key={idx} className="hover:bg-slate-800/30 transition">
                       <td className="py-2.5 px-3 text-slate-500 font-mono">{idx + 1}</td>
-                      <td className="py-2.5 px-3 font-mono font-bold text-white">{username}</td>
+                      <td className="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-white">{username}</td>
                       <td className="py-2.5 px-3 font-semibold text-slate-200">{name}</td>
                       <td className="py-2.5 px-3">
                         <span
@@ -338,8 +338,8 @@ export default function BulkUserImportPage() {
                           {role}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 text-slate-400">{group}</td>
-                      <td className="py-2.5 px-3 text-slate-400 font-mono">{nis}</td>
+                      <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400">{group}</td>
+                      <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 font-mono">{nis}</td>
                       <td className="py-2.5 px-3 font-mono text-slate-500">{pass}</td>
                     </tr>
                   );

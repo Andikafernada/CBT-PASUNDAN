@@ -195,7 +195,7 @@ export default function SuperuserManagementPage() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1">
@@ -203,10 +203,10 @@ export default function SuperuserManagementPage() {
               <span>Superuser Privilege</span>
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">
             Manajemen Pengguna & Hak Akses
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Kontrol penuh CRUD akun Administrator, Guru Penguji, Operator Proktor, dan Siswa.
           </p>
         </div>
@@ -214,7 +214,7 @@ export default function SuperuserManagementPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={handleExportExcel}
-            className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5"
+            className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5"
             title="Download Rekap Seluruh Pengguna ke Excel"
           >
             <Download className="w-4 h-4 text-emerald-400" />
@@ -240,7 +240,7 @@ export default function SuperuserManagementPage() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -248,7 +248,7 @@ export default function SuperuserManagementPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nama, username, atau NIS..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
           />
         </div>
 
@@ -256,7 +256,7 @@ export default function SuperuserManagementPage() {
           <select
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
-            className="px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+            className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
           >
             <option value="ALL">Semua Hak Akses (Role)</option>
             <option value="ADMIN">Administrator (Superuser)</option>
@@ -268,7 +268,7 @@ export default function SuperuserManagementPage() {
           <select
             value={filterGroup}
             onChange={(e) => setFilterGroup(e.target.value)}
-            className="px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+            className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
           >
             <option value="ALL">Semua Kelas / Rombel</option>
             {groups.map((g) => (
@@ -280,7 +280,7 @@ export default function SuperuserManagementPage() {
 
           <button
             onClick={fetchUsers}
-            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition"
+            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition"
             title="Segarkan"
           >
             <RefreshCw className="w-4 h-4" />
@@ -289,7 +289,7 @@ export default function SuperuserManagementPage() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl">
         {loading ? (
           <div className="py-12 text-center text-xs text-slate-500">Memuat data pengguna...</div>
         ) : filteredUsers.length === 0 ? (
@@ -297,7 +297,7 @@ export default function SuperuserManagementPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-slate-400 border-b border-slate-800">
+              <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th className="py-3 px-4">Nama Lengkap</th>
                   <th className="py-3 px-4">Username</th>
@@ -311,11 +311,11 @@ export default function SuperuserManagementPage() {
                 {filteredUsers.map((user) => {
                   return (
                     <tr key={user.id} className="hover:bg-slate-800/30 transition">
-                      <td className="py-3.5 px-4 font-semibold text-white">
+                      <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
                         <div>{user.name}</div>
                         {user.nis && <div className="text-[10px] text-slate-500 font-mono">NIS: {user.nis}</div>}
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-slate-300 font-bold">{user.username}</td>
+                      <td className="py-3.5 px-4 font-mono text-slate-700 dark:text-slate-300 font-bold">{user.username}</td>
                       <td className="py-3.5 px-4">
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
@@ -337,7 +337,7 @@ export default function SuperuserManagementPage() {
                             : "SISWA"}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-400">{user.group?.name || "-"}</td>
+                      <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">{user.group?.name || "-"}</td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-1.5">
                           {user.isActive ? (
@@ -376,7 +376,7 @@ export default function SuperuserManagementPage() {
                               });
                               setShowEditModal(true);
                             }}
-                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-white rounded-lg transition"
+                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-slate-900 dark:text-white rounded-lg transition"
                             title="Edit Data & Role Pengguna"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -384,7 +384,7 @@ export default function SuperuserManagementPage() {
 
                           <button
                             onClick={() => handleQuickResetPassword(user.id, user.name)}
-                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-white rounded-lg transition"
+                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-slate-900 dark:text-white rounded-lg transition"
                             title="Reset Password ke 123456"
                           >
                             <Key className="w-3.5 h-3.5" />
@@ -393,7 +393,7 @@ export default function SuperuserManagementPage() {
                           {user.deviceFingerprint && (
                             <button
                               onClick={() => handleUnlockDevice(user.id, user.name)}
-                              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-purple-400 hover:text-white rounded-lg transition"
+                              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-purple-400 hover:text-slate-900 dark:text-white rounded-lg transition"
                               title="Buka Kunci Perangkat"
                             >
                               <Unlock className="w-3.5 h-3.5" />
@@ -402,7 +402,7 @@ export default function SuperuserManagementPage() {
 
                           <button
                             onClick={() => handleDeleteUser(user.id, user.name)}
-                            className="p-1.5 bg-slate-800 hover:bg-rose-600 text-rose-400 hover:text-white rounded-lg transition"
+                            className="p-1.5 bg-slate-800 hover:bg-rose-600 text-rose-400 hover:text-slate-900 dark:text-white rounded-lg transition"
                             title="Hapus Pengguna"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -420,19 +420,19 @@ export default function SuperuserManagementPage() {
 
       {/* Modal Create User */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-in zoom-in-95">
-            <h2 className="text-lg font-bold text-white mb-1">Tambah Pengguna Baru</h2>
-            <p className="text-xs text-slate-400 mb-5">Pilih role hak akses dan isi kredensial akun.</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-in zoom-in-95">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Tambah Pengguna Baru</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">Pilih role hak akses dan isi kredensial akun.</p>
 
             <form onSubmit={handleCreateUser} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Hak Akses (Role)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Hak Akses (Role)</label>
                   <select
                     value={createForm.role}
                     onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-semibold"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-semibold"
                   >
                     <option value="ADMIN">ADMINISTRATOR (Superuser)</option>
                     <option value="TEACHER">GURU / PENGUJI</option>
@@ -441,11 +441,11 @@ export default function SuperuserManagementPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Kelas / Rombel</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Kelas / Rombel</label>
                   <select
                     value={createForm.groupId}
                     onChange={(e) => setCreateForm({ ...createForm, groupId: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
                   >
                     <option value="">Tanpa Kelas</option>
                     {groups.map((g) => (
@@ -458,70 +458,70 @@ export default function SuperuserManagementPage() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Nama Lengkap</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Nama Lengkap</label>
                 <input
                   type="text"
                   required
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                   placeholder="misal: Dr. Budi Santoso, M.Kom"
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Username Login</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Username Login</label>
                   <input
                     type="text"
                     required
                     value={createForm.username}
                     onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
                     placeholder="misal: budi_santoso"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Password</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Password</label>
                   <input
                     type="password"
                     required
                     value={createForm.password}
                     onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
                     placeholder="Password akun"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">NIS / NIP (Opsional)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">NIS / NIP (Opsional)</label>
                   <input
                     type="text"
                     value={createForm.nis}
                     onChange={(e) => setCreateForm({ ...createForm, nis: e.target.value })}
                     placeholder="Nomor identitas"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Email (Opsional)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Email (Opsional)</label>
                   <input
                     type="email"
                     value={createForm.email}
                     onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                     placeholder="email@sekolah.sch.id"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold"
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold"
                 >
                   Batal
                 </button>
@@ -539,19 +539,19 @@ export default function SuperuserManagementPage() {
 
       {/* Modal Edit User */}
       {showEditModal && editForm && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-in zoom-in-95">
-            <h2 className="text-lg font-bold text-white mb-1">Edit Pengguna: {editForm.name}</h2>
-            <p className="text-xs text-slate-400 mb-5">Ubah hak akses, nama, atau reset password pengguna.</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-in zoom-in-95">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Edit Pengguna: {editForm.name}</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">Ubah hak akses, nama, atau reset password pengguna.</p>
 
             <form onSubmit={handleUpdateUser} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Hak Akses (Role)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Hak Akses (Role)</label>
                   <select
                     value={editForm.role}
                     onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-semibold"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-semibold"
                   >
                     <option value="ADMIN">ADMINISTRATOR (Superuser)</option>
                     <option value="TEACHER">GURU / PENGUJI</option>
@@ -560,11 +560,11 @@ export default function SuperuserManagementPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Kelas / Rombel</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Kelas / Rombel</label>
                   <select
                     value={editForm.groupId || ""}
                     onChange={(e) => setEditForm({ ...editForm, groupId: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
                   >
                     <option value="">Tanpa Kelas</option>
                     {groups.map((g) => (
@@ -577,55 +577,55 @@ export default function SuperuserManagementPage() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Nama Lengkap</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Nama Lengkap</label>
                 <input
                   type="text"
                   required
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Username</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Username</label>
                   <input
                     type="text"
                     required
                     value={editForm.username}
                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Password Baru (Kosongkan jika tidak ubah)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Password Baru (Kosongkan jika tidak ubah)</label>
                   <input
                     type="password"
                     value={editForm.password || ""}
                     onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                     placeholder="Kosongkan jika tetap"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">NIS / NIP</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">NIS / NIP</label>
                   <input
                     type="text"
                     value={editForm.nis || ""}
                     onChange={(e) => setEditForm({ ...editForm, nis: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Status Akun</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Status Akun</label>
                   <select
                     value={editForm.isActive ? "1" : "0"}
                     onChange={(e) => setEditForm({ ...editForm, isActive: e.target.value === "1" })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
                   >
                     <option value="1">Aktif</option>
                     <option value="0">Nonaktif / Diblokir</option>
@@ -633,11 +633,11 @@ export default function SuperuserManagementPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold"
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold"
                 >
                   Batal
                 </button>

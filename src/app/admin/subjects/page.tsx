@@ -120,12 +120,12 @@ export default function SubjectsPage() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             Mata Pelajaran & Topik Soal
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Kelola kurikulum mata pelajaran dan struktur topik/bab soal untuk bank soal.
           </p>
         </div>
@@ -136,7 +136,7 @@ export default function SubjectsPage() {
               setTopicForm({ id: "", subjectId: subjects[0]?.id || "", name: "", code: "", description: "" });
               setShowTopicModal(true);
             }}
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah Topik/Bab</span>
@@ -156,7 +156,7 @@ export default function SubjectsPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-lg">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-lg">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -164,13 +164,13 @@ export default function SubjectsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari mata pelajaran atau kode..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
           />
         </div>
 
         <button
           onClick={fetchSubjects}
-          className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition"
+          className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition"
           title="Segarkan"
         >
           <RefreshCw className="w-4 h-4" />
@@ -193,7 +193,7 @@ export default function SubjectsPage() {
             return (
               <div
                 key={subject.id}
-                className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-slate-700 transition"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-slate-200 dark:border-slate-700 transition"
               >
                 <div>
                   <div className="flex items-start justify-between gap-3 mb-2">
@@ -203,14 +203,14 @@ export default function SubjectsPage() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h2 className="text-base font-bold text-white tracking-tight">{subject.name}</h2>
+                          <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">{subject.name}</h2>
                           {subject.code && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                               {subject.code}
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-slate-400 mt-0.5">
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                           {subject.topics?.length || 0} Topik • {totalQuestions || 0} Butir Soal
                         </div>
                       </div>
@@ -234,7 +234,7 @@ export default function SubjectsPage() {
                       </button>
                       <button
                         onClick={() => handleDeleteSubject(subject.id, subject.name)}
-                        className="p-1.5 bg-slate-800 hover:bg-rose-600 text-rose-400 hover:text-white rounded-lg transition"
+                        className="p-1.5 bg-slate-800 hover:bg-rose-600 text-rose-400 hover:text-slate-900 dark:text-white rounded-lg transition"
                         title="Hapus Mata Pelajaran"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -243,12 +243,12 @@ export default function SubjectsPage() {
                   </div>
 
                   {subject.description && (
-                    <p className="text-xs text-slate-400 mt-2 line-clamp-2">{subject.description}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 line-clamp-2">{subject.description}</p>
                   )}
 
                   {/* Topics List under this subject */}
                   <div className="mt-4 pt-3 border-t border-slate-800/80 space-y-2">
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                       <span>Daftar Topik / Bab:</span>
                       <button
                         onClick={() => {
@@ -267,7 +267,7 @@ export default function SubjectsPage() {
                         {subject.topics.map((topic: any) => (
                           <div
                             key={topic.id}
-                            className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between text-xs hover:border-slate-700 transition"
+                            className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs hover:border-slate-200 dark:border-slate-700 transition"
                           >
                             <div className="flex items-center gap-2">
                               <Layers className="w-3.5 h-3.5 text-indigo-400" />
@@ -278,7 +278,7 @@ export default function SubjectsPage() {
                             </div>
 
                             <div className="flex items-center gap-2">
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
                                 {topic._count?.questions || 0} Soal
                               </span>
 
@@ -293,7 +293,7 @@ export default function SubjectsPage() {
                                   });
                                   setShowTopicModal(true);
                                 }}
-                                className="p-1 text-slate-400 hover:text-blue-400"
+                                className="p-1 text-slate-500 dark:text-slate-400 hover:text-blue-400"
                                 title="Edit Topik"
                               >
                                 <Edit2 className="w-3 h-3" />
@@ -301,7 +301,7 @@ export default function SubjectsPage() {
 
                               <button
                                 onClick={() => handleDeleteTopic(topic.id, topic.name)}
-                                className="p-1 text-slate-400 hover:text-rose-400"
+                                className="p-1 text-slate-500 dark:text-slate-400 hover:text-rose-400"
                                 title="Hapus Topik"
                               >
                                 <Trash2 className="w-3 h-3" />
@@ -325,54 +325,54 @@ export default function SubjectsPage() {
 
       {/* Modal Subject */}
       {showSubjectModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in zoom-in-95">
-            <h2 className="text-lg font-bold text-white mb-1">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in zoom-in-95">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
               {subjectForm.id ? "Edit Mata Pelajaran" : "Tambah Mata Pelajaran"}
             </h2>
-            <p className="text-xs text-slate-400 mb-5">Lengkapi nama dan kode singkatan mata pelajaran.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">Lengkapi nama dan kode singkatan mata pelajaran.</p>
 
             <form onSubmit={handleSaveSubject} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Nama Mata Pelajaran</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Nama Mata Pelajaran</label>
                 <input
                   type="text"
                   required
                   value={subjectForm.name}
                   onChange={(e) => setSubjectForm({ ...subjectForm, name: e.target.value })}
                   placeholder="misal: Matematika Peminatan"
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Kode Singkatan</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Kode Singkatan</label>
                 <input
                   type="text"
                   required
                   value={subjectForm.code}
                   onChange={(e) => setSubjectForm({ ...subjectForm, code: e.target.value.toUpperCase() })}
                   placeholder="misal: MTK-MIN"
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono uppercase"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono uppercase"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Deskripsi / Keterangan</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Deskripsi / Keterangan</label>
                 <textarea
                   rows={3}
                   value={subjectForm.description}
                   onChange={(e) => setSubjectForm({ ...subjectForm, description: e.target.value })}
                   placeholder="Keterangan kurikulum..."
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowSubjectModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold"
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold"
                 >
                   Batal
                 </button>
@@ -390,21 +390,21 @@ export default function SubjectsPage() {
 
       {/* Modal Topic */}
       {showTopicModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in zoom-in-95">
-            <h2 className="text-lg font-bold text-white mb-1">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in zoom-in-95">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
               {topicForm.id ? "Edit Topik / Bab" : "Tambah Topik / Bab Baru"}
             </h2>
-            <p className="text-xs text-slate-400 mb-5">Pilih mata pelajaran induk dan beri nama topik.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">Pilih mata pelajaran induk dan beri nama topik.</p>
 
             <form onSubmit={handleSaveTopic} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Mata Pelajaran Induk</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Mata Pelajaran Induk</label>
                 <select
                   required
                   value={topicForm.subjectId}
                   onChange={(e) => setTopicForm({ ...topicForm, subjectId: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-semibold"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-semibold"
                 >
                   {subjects.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -415,33 +415,33 @@ export default function SubjectsPage() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Nama Topik / Bab</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Nama Topik / Bab</label>
                 <input
                   type="text"
                   required
                   value={topicForm.name}
                   onChange={(e) => setTopicForm({ ...topicForm, name: e.target.value })}
                   placeholder="misal: Bab 1 - Limit Trigonometri"
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Kode Topik (Opsional)</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Kode Topik (Opsional)</label>
                 <input
                   type="text"
                   value={topicForm.code}
                   onChange={(e) => setTopicForm({ ...topicForm, code: e.target.value.toUpperCase() })}
                   placeholder="misal: BAB-01"
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono uppercase"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono uppercase"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowTopicModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold"
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold"
                 >
                   Batal
                 </button>

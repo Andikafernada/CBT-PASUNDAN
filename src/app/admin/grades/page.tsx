@@ -97,7 +97,7 @@ export default function GradesPage() {
         <button
           onClick={exportCSV}
           disabled={exporting || grades.length === 0}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm"
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-slate-900 dark:text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm"
         >
           {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
           Export CSV
@@ -177,12 +177,12 @@ export default function GradesPage() {
       {/* Table */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
         {loading ? (
-          <div className="py-12 text-center text-slate-400">
+          <div className="py-12 text-center text-slate-500 dark:text-slate-400">
             <div className="w-7 h-7 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
             <span className="text-xs">Memuat rekap nilai...</span>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-12 text-center text-slate-400 text-xs">Tidak ada data dengan filter ini.</div>
+          <div className="py-12 text-center text-slate-500 dark:text-slate-400 text-xs">Tidak ada data dengan filter ini.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
@@ -205,7 +205,7 @@ export default function GradesPage() {
                   const statusInfo = STATUS_LABELS[row.attendanceStatus] || { label: row.attendanceStatus, color: "slate" };
                   return (
                     <tr key={`${row.examId}-${row.studentId}-${i}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
-                      <td className="py-2.5 px-3 text-slate-400">{i + 1}</td>
+                      <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400">{i + 1}</td>
                       <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400">{row.nis}</td>
                       <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">{row.studentName}</td>
                       <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300">{row.groupName}</td>
@@ -217,10 +217,10 @@ export default function GradesPage() {
                           {statusInfo.label}
                         </span>
                       </td>
-                      <td className={`py-2.5 px-3 text-right font-black text-base ${row.score !== null ? (row.score >= 75 ? "text-emerald-600 dark:text-emerald-400" : row.score >= 60 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400") : "text-slate-400"}`}>
+                      <td className={`py-2.5 px-3 text-right font-black text-base ${row.score !== null ? (row.score >= 75 ? "text-emerald-600 dark:text-emerald-400" : row.score >= 60 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400") : "text-slate-500 dark:text-slate-400"}`}>
                         {row.score !== null ? row.score : "-"}
                       </td>
-                      <td className="py-2.5 px-3 text-slate-400 max-w-[160px] truncate">{row.note}</td>
+                      <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 max-w-[160px] truncate">{row.note}</td>
                     </tr>
                   );
                 })}
@@ -230,7 +230,7 @@ export default function GradesPage() {
         )}
       </div>
 
-      <p className="text-xs text-slate-400 text-center">Total: {filtered.length} baris rekap nilai</p>
+      <p className="text-xs text-slate-500 dark:text-slate-400 text-center">Total: {filtered.length} baris rekap nilai</p>
     </div>
   );
 }
