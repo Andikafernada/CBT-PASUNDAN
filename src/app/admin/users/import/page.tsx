@@ -25,6 +25,30 @@ export default function BulkUserImportPage() {
   const [defaultRole, setDefaultRole] = useState("STUDENT");
   const [loading, setLoading] = useState(false);
   const [importResult, setImportResult] = useState<any>(null);
+  const [showPasswords, setShowPasswords] = useState(false);
+
+  // Helper to download base64 Excel
+  const downloadFilledExcel = (base64Data: string, filename: string) => {
+    try {
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename || "DAFTAR_PESERTA_DENGAN_AKUN_CBT.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      alert(`Gagal mengunduh file: ${e.message}`);
+    }
+  };
 
   // Download Sample Excel Template
   const handleDownloadTemplate = () => {
@@ -143,7 +167,10 @@ export default function BulkUserImportPage() {
       if (!res.ok) throw new Error(data.error || "Gagal mengimpor pengguna");
 
       setImportResult(data);
-      alert(`Import Selesai! ${data.createdCount} akun baru dibuat, ${data.updatedCount} akun diperbarui.`);
+      if (data.fileBase64) {
+        downloadFilledExcel(data.fileBase64, data.downloadFileName || "DAFTAR_PESERTA_DENGAN_AKUN_CBT.xlsx");
+      }
+      alert(`✅ Import & Auto-Generate Selesai!\n\n${data.createdCount} akun baru dibuat, ${data.updatedCount} akun diperbarui.\nFile Excel terisi lengkap dengan Username & Password telah otomatis diunduh.`);
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -151,10 +178,30 @@ export default function BulkUserImportPage() {
     }
   };
 
+  // Export hasil impor (nama, username, password asli) ke Excel untuk dicetak/didistribusikan.
+  // Password asli hanya tersedia SEKALI pada response ini - tidak akan bisa diambil lagi.
+  const handleDownloadCredentialExcel = () => {
+    const rows = (importResult?.passwords || []).map((p: any, idx: number) => ({
+      No: idx + 1,
+      "Nama Lengkap": p.name || "",
+      Username: p.username || "",
+      Password: p.password || "",
+    }));
+    if (rows.length === 0) {
+      alert("Tidak ada data password yang dapat diekspor.");
+      return;
+    }
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    worksheet["!cols"] = [{ wch: 6 }, { wch: 32 }, { wch: 18 }, { wch: 14 }];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Kartu Akses CBT");
+    XLSX.writeFile(workbook, `Kartu_Akses_CBT_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-sky-200">
         <div>
           <div className="flex items-center gap-2">
             <Link
@@ -165,7 +212,7 @@ export default function BulkUserImportPage() {
               <span>Kembali ke Manajemen Pengguna</span>
             </Link>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-black tracking-tight mt-1">
             Import Akun Guru, Siswa, & Operator Masal
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -173,18 +220,71 @@ export default function BulkUserImportPage() {
           </p>
         </div>
 
-        <button
-          onClick={handleDownloadTemplate}
-          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition shrink-0"
-        >
-          <Download className="w-4 h-4" />
-          <span>Download Format Template Excel</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <a
+            href="/templates/TEMPLATE_DAFTAR_PESERTA_STS.xlsx"
+            download="TEMPLATE_DAFTAR_PESERTA_STS.xlsx"
+            className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 transition"
+            title="Download Template Format STS (Multi-Sheet X, XI, XII)"
+          >
+            <Download className="w-4 h-4 text-white" />
+            <span>Download Template STS (X, XI, XII)</span>
+          </a>
+          <a
+            href="/templates/TEMPLATE_UPLOAD_PESERTA_STANDAR.xlsx"
+            download="TEMPLATE_UPLOAD_PESERTA_STANDAR.xlsx"
+            className="px-3 py-2.5 bg-white hover:bg-sky-50 text-black border border-sky-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-xs"
+            title="Download Template Sederhana 1 Sheet"
+          >
+            <Download className="w-3.5 h-3.5 text-black" />
+            <span>Template Standar (1-Sheet)</span>
+          </a>
+          <button
+            type="button"
+            onClick={handleDownloadTemplate}
+            className="px-3 py-2.5 bg-sky-100 hover:bg-sky-200 text-black border border-sky-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+            title="Download Template Akun Guru / Penguji & Operator"
+          >
+            <span>Format Guru/Operator</span>
+          </button>
+        </div>
       </div>
 
       {/* Upload Box */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-        <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500/60 rounded-2xl p-8 text-center transition bg-slate-950/40 relative">
+      <div className="glass p-6 space-y-6">
+        {/* Template Download Recommendation Banner */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-300 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center justify-center shrink-0">
+              <FileSpreadsheet className="w-5 h-5 text-emerald-700" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-black">Format Template Upload Peserta STS Tersedia</h4>
+              <p className="text-[11px] text-black font-medium">
+                Gunakan template resmi multi-sheet (Sheet X, XI, XII) untuk impor data peserta dengan generate NIS & password otomatis.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <a
+              href="/templates/TEMPLATE_DAFTAR_PESERTA_STS.xlsx"
+              download="TEMPLATE_DAFTAR_PESERTA_STS.xlsx"
+              className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-black flex items-center gap-1.5 shadow-xs"
+            >
+              <Download className="w-4 h-4 text-white" />
+              <span>Download Template STS</span>
+            </a>
+            <a
+              href="/templates/TEMPLATE_UPLOAD_PESERTA_STANDAR.xlsx"
+              download="TEMPLATE_UPLOAD_PESERTA_STANDAR.xlsx"
+              className="px-3 py-2 bg-white hover:bg-sky-50 text-black border border-emerald-300 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-xs"
+            >
+              <Download className="w-3.5 h-3.5 text-black" />
+              <span>1-Sheet</span>
+            </a>
+          </div>
+        </div>
+        <div className="border-2 border-dashed border-slate-200 dark:border-sky-200 hover:border-blue-500/60 rounded-2xl p-8 text-center transition bg-sky-50 relative">
           <input
             type="file"
             accept=".xlsx, .xls, .csv"
@@ -196,28 +296,28 @@ export default function BulkUserImportPage() {
               <FileSpreadsheet className="w-7 h-7" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-900 dark:text-white">
+              <p className="text-sm font-bold text-slate-900 dark:text-black">
                 {file ? file.name : "Klik atau seret file Excel (.xlsx / .xls) ke sini"}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 {file
                   ? `${(file.size / 1024).toFixed(1)} KB • ${previewRows.length} baris data terdeteksi`
-                  : "Mendukung format kolom standar: Username, Password, Nama, Role, Kelas, NIS, Email"}
+                  : "Mendukung format ZYACBT standar maupun template resmi DAFTAR PESERTA STS (Multi-Sheet X, XI, XII). Username & Password kosong akan otomatis di-generate unik."}
               </p>
             </div>
           </div>
         </div>
 
         {/* Default Role Fallback */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-950/60 rounded-xl border border-slate-800/80">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-sky-50 rounded-xl border border-sky-300/80">
           <div>
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Peran Default (Bila kolom Role kosong di Excel)</div>
+            <div className="text-xs font-bold text-slate-900 dark:text-black">Peran Default (Bila kolom Role kosong di Excel)</div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400">Pilih role default jika file tidak menentukan kolom &apos;Role&apos;.</div>
           </div>
           <select
             value={defaultRole}
             onChange={(e) => setDefaultRole(e.target.value)}
-            className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-blue-500"
+            className="px-3 py-2 bg-white dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-xs text-slate-900 dark:text-black font-semibold focus:outline-none focus:border-blue-500"
           >
             <option value="TEACHER">GURU / PENGUJI (TEACHER)</option>
             <option value="STUDENT">SISWA PESERTA (STUDENT)</option>
@@ -234,7 +334,7 @@ export default function BulkUserImportPage() {
                 setFile(null);
                 setPreviewRows([]);
               }}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
+              className="px-4 py-2 bg-sky-100 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
             >
               Reset File
             </button>
@@ -258,15 +358,15 @@ export default function BulkUserImportPage() {
             <span>Proses Import Massal Berhasil!</span>
           </div>
           <div className="grid grid-cols-3 gap-3 text-xs pt-1">
-            <div className="p-3 bg-slate-900/60 rounded-xl border border-emerald-500/20">
+            <div className="p-3 bg-sky-100 rounded-xl border border-emerald-500/20">
               <div className="text-slate-500 dark:text-slate-400">Total Baris:</div>
-              <div className="font-bold text-slate-900 dark:text-white text-base mt-0.5">{importResult.totalRows}</div>
+              <div className="font-bold text-slate-900 dark:text-black text-base mt-0.5">{importResult.totalRows}</div>
             </div>
-            <div className="p-3 bg-slate-900/60 rounded-xl border border-emerald-500/20">
+            <div className="p-3 bg-sky-100 rounded-xl border border-emerald-500/20">
               <div className="text-slate-500 dark:text-slate-400">Akun Baru Dibuat:</div>
               <div className="font-bold text-emerald-400 text-base mt-0.5">{importResult.createdCount}</div>
             </div>
-            <div className="p-3 bg-slate-900/60 rounded-xl border border-emerald-500/20">
+            <div className="p-3 bg-sky-100 rounded-xl border border-emerald-500/20">
               <div className="text-slate-500 dark:text-slate-400">Akun Diperbarui:</div>
               <div className="font-bold text-blue-400 text-base mt-0.5">{importResult.updatedCount}</div>
             </div>
@@ -282,23 +382,45 @@ export default function BulkUserImportPage() {
               ))}
             </div>
           )}
+
+          {importResult.passwords && importResult.passwords.length > 0 && (
+            <div className="flex flex-wrap items-center gap-3 pt-3 mt-3 border-t border-emerald-500/20">
+              <button
+                onClick={handleDownloadCredentialExcel}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition"
+              >
+                <Download className="w-4 h-4" />
+                <span>Unduh Kartu Akses (Excel)</span>
+              </button>
+              <button
+                onClick={() => setShowPasswords(true)}
+                className="px-4 py-2 bg-sky-100 hover:bg-sky-100 border border-emerald-500/30 text-emerald-300 rounded-xl text-xs font-bold flex items-center gap-2 transition"
+              >
+                <Users className="w-4 h-4" />
+                <span>Lihat Daftar Password ({importResult.passwords.length})</span>
+              </button>
+              <span className="text-[10px] text-emerald-400/70 ml-auto">
+                Password hanya muncul SEKALI di sini - simpan / cetak sekarang.
+              </span>
+            </div>
+          )}
         </div>
       )}
 
       {/* Preview Table */}
       {previewRows.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl space-y-3 p-5">
+        <div className="glass overflow-hidden space-y-3 p-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-black flex items-center gap-2">
               <FileCheck className="w-4 h-4 text-blue-400" />
               <span>Preview Data Excel ({previewRows.length} Baris)</span>
             </h3>
             <span className="text-xs text-slate-500 dark:text-slate-400">Periksa kolom sebelum menekan tombol simpan</span>
           </div>
 
-          <div className="overflow-x-auto max-h-96 border border-slate-200 dark:border-slate-800 rounded-xl">
+          <div className="overflow-x-auto max-h-96 border border-slate-200 dark:border-sky-200 rounded-xl">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 sticky top-0 border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-sky-50 text-slate-500 dark:text-slate-400 sticky top-0 border-b border-slate-200 dark:border-sky-200">
                 <tr>
                   <th className="py-2.5 px-3">No</th>
                   <th className="py-2.5 px-3">Username</th>
@@ -319,9 +441,9 @@ export default function BulkUserImportPage() {
                   const pass = String(row.Password || row.password || "123456");
 
                   return (
-                    <tr key={idx} className="hover:bg-slate-800/30 transition">
+                    <tr key={idx} className="hover:bg-sky-100 transition">
                       <td className="py-2.5 px-3 text-slate-500 font-mono">{idx + 1}</td>
-                      <td className="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-white">{username}</td>
+                      <td className="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-black">{username}</td>
                       <td className="py-2.5 px-3 font-semibold text-slate-200">{name}</td>
                       <td className="py-2.5 px-3">
                         <span
@@ -346,6 +468,60 @@ export default function BulkUserImportPage() {
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Daftar Password Hasil Import */}
+      {showPasswords && importResult?.passwords?.length > 0 && (
+        <div className="fixed inset-0 bg-sky-950/25 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass max-w-2xl w-full p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900 dark:text-black flex items-center gap-2">
+                <Users className="w-5 h-5 text-emerald-400" />
+                <span>Daftar Password Akun ({importResult.passwords.length})</span>
+              </h3>
+              <button
+                onClick={() => setShowPasswords(false)}
+                className="p-2 bg-sky-100 hover:bg-slate-700 text-slate-400 rounded-lg text-xs"
+              >
+                Tutup
+              </button>
+            </div>
+            <p className="text-[11px] text-amber-500 bg-amber-500/10 border border-amber-500/25 rounded-lg px-3 py-2">
+              Password hanya ditampilkan SEKALI pada proses ini. Segera unduh / cetak kartu. Password tidak dapat diambil ulang.
+            </p>
+            <div className="overflow-x-auto max-h-96 border border-slate-200 dark:border-sky-200 rounded-xl">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-sky-50 text-slate-500 dark:text-slate-400 sticky top-0 border-b border-slate-200 dark:border-sky-200">
+                  <tr>
+                    <th className="py-2.5 px-3">No</th>
+                    <th className="py-2.5 px-3">Nama Lengkap</th>
+                    <th className="py-2.5 px-3">Username</th>
+                    <th className="py-2.5 px-3">Password</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {importResult.passwords.map((p: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-sky-100 transition">
+                      <td className="py-2.5 px-3 text-slate-500 font-mono">{idx + 1}</td>
+                      <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-black">{p.name}</td>
+                      <td className="py-2.5 px-3 font-mono font-bold text-slate-700 dark:text-slate-300">{p.username}</td>
+                      <td className="py-2.5 px-3 font-mono font-bold text-emerald-500">{p.password}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={handleDownloadCredentialExcel}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition"
+              >
+                <Download className="w-4 h-4" />
+                <span>Unduh Excel</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

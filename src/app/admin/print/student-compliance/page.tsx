@@ -14,7 +14,7 @@ export default function PrintStudentCompliancePage() {
   const [schoolName, setSchoolName] = useState("SMK PASUNDAN 2 BANDUNG");
   const [schoolAddress, setSchoolAddress] = useState("Jl. Cihampelas No. 222, Bandung • Telp. (022) 2033000");
   const [academicYear, setAcademicYear] = useState("TAHUN AJARAN 2026/2027");
-  const [docTitle, setDocTitle] = useState("BERITA ACARA AUDIT KEDISIPLINAN & PELANGGARAN ASESMEN");
+  const [docTitle, setDocTitle] = useState("BERITA ACARA AUDIT KEDISIPLINAN & PELANGGARAN ASESMEN CBT HEBAT");
   const [bkCoordinator, setBkCoordinator] = useState("Dra. Hj. Siti Aminah, M.Pd");
   const [bkNip, setBkNip] = useState("19780820 200501 2 004");
   const [proctorName, setProctorName] = useState("Andika Fernanda, S.Kom");
@@ -53,16 +53,16 @@ export default function PrintStudentCompliancePage() {
   return (
     <div className="space-y-6">
       {/* Control Header - Hidden when printing */}
-      <div className="print:hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
+      <div className="print:hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-sky-200">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/reports/students"
-            className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition shadow-xs"
+            className="p-2 rounded-xl bg-white dark:bg-sky-50 border border-slate-200 dark:border-sky-200 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition shadow-xs"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Cetak Berita Acara Kedisiplinan Siswa</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-black tracking-tight">Cetak Berita Acara Kedisiplinan Siswa</h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Format cetak resmi rekapitulasi pelanggaran dan keterlambatan untuk BK & Kesiswaan (A4 Baku).
             </p>
@@ -75,7 +75,7 @@ export default function PrintStudentCompliancePage() {
             className={`p-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
               showConfig
                 ? "bg-purple-600 text-white border-purple-500"
-                : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-xs"
+                : "bg-white dark:bg-sky-50 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-sky-200 hover:bg-slate-50 dark:hover:bg-sky-100 shadow-xs"
             }`}
           >
             <Settings2 className="w-4 h-4" />
@@ -85,7 +85,7 @@ export default function PrintStudentCompliancePage() {
           <select
             value={selectedGroup}
             onChange={(e) => setSelectedGroup(e.target.value)}
-            className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-blue-500 font-semibold shadow-xs"
+            className="p-2 rounded-xl bg-white dark:bg-sky-50 border border-slate-200 dark:border-sky-200 text-xs text-slate-800 dark:text-black focus:outline-none focus:border-blue-500 font-semibold shadow-xs"
           >
             <option value="ALL">Semua Rombel</option>
             {groups.map((g) => (
@@ -107,8 +107,8 @@ export default function PrintStudentCompliancePage() {
 
       {/* Config Drawer (Hidden when printing) */}
       {showConfig && (
-        <div className="print:hidden p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-xs space-y-3 shadow-xs">
-          <div className="font-bold text-slate-900 dark:text-white mb-1">Pengaturan Informasi Dokumen:</div>
+        <div className="print:hidden p-4 rounded-2xl bg-white dark:bg-sky-50 border border-slate-200/80 dark:border-sky-200 text-xs space-y-3 shadow-xs">
+          <div className="font-bold text-slate-900 dark:text-black mb-1">Pengaturan Informasi Dokumen:</div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="text-slate-500 dark:text-slate-400 block mb-1">Nama Sekolah</label>
@@ -116,7 +116,7 @@ export default function PrintStudentCompliancePage() {
                 type="text"
                 value={schoolName}
                 onChange={(e) => setSchoolName(e.target.value)}
-                className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white font-semibold"
+                className="w-full p-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-lg text-slate-900 dark:text-black font-semibold"
               />
             </div>
             <div>
@@ -125,7 +125,7 @@ export default function PrintStudentCompliancePage() {
                 type="text"
                 value={bkCoordinator}
                 onChange={(e) => setBkCoordinator(e.target.value)}
-                className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white"
+                className="w-full p-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-lg text-slate-900 dark:text-black"
               />
             </div>
             <div>
@@ -134,7 +134,7 @@ export default function PrintStudentCompliancePage() {
                 type="text"
                 value={proctorName}
                 onChange={(e) => setProctorName(e.target.value)}
-                className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white"
+                className="w-full p-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-lg text-slate-900 dark:text-black"
               />
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function PrintStudentCompliancePage() {
 
         {/* Introduction Paragraph */}
         <p className="font-sans text-[11px] leading-relaxed mb-4 text-justify">
-          Berdasarkan hasil audit sistem pengawasan digital <em>Computer-Based Test (CBT)</em>, berikut disampaikan rekapitulasi data akumulasi pelanggaran tata tertib ujian, keterlambatan login, dan keikutsertaan ujian susulan peserta didik untuk ditindaklanjuti oleh Guru Bimbingan & Konseling (BK) serta Tim Kesiswaan:
+          Berdasarkan hasil audit sistem pengawasan digital <em>CBT HEBAT SMK Pasundan 2 Bandung</em>, berikut disampaikan rekapitulasi data akumulasi pelanggaran tata tertib ujian, keterlambatan login, dan keikutsertaan ujian susulan peserta didik untuk ditindaklanjuti oleh Guru Bimbingan & Konseling (BK) serta Tim Kesiswaan:
         </p>
 
         {/* Summary Table */}

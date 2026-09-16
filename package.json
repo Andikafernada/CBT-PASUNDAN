@@ -9,7 +9,8 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
-    "db:import-legacy": "node scripts/import-legacy-zyacbt.js"
+    "db:import-legacy": "node scripts/import-legacy-zyacbt.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "@prisma/client": "^6.4.0",
@@ -25,7 +26,6 @@
     "puppeteer-core": "^25.9.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "ssh2": "^1.17.0",
     "tailwind-merge": "^3.0.1",
     "xlsx": "^0.18.5"
   },
@@ -39,6 +39,7 @@
     "postcss": "^8.5.2",
     "prisma": "^6.4.0",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.11"
   }
 }

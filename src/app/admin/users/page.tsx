@@ -22,6 +22,13 @@ import {
   Download,
 } from "lucide-react";
 
+const CHARACTERS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+function generateRandomPassword(length = 8) {
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => CHARACTERS[b % CHARACTERS.length]).join("");
+}
+
 export default function SuperuserManagementPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
@@ -46,6 +53,9 @@ export default function SuperuserManagementPage() {
   // Edit Modal
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState<any>(null);
+
+  // Modal hasil generate/reset password (tampil SEKALI)
+  const [credentialModal, setCredentialModal] = useState<any>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -77,7 +87,6 @@ export default function SuperuserManagementPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal membuat pengguna");
-      alert("Pengguna berhasil ditambahkan!");
       setShowCreateModal(false);
       setCreateForm({
         username: "",
@@ -89,6 +98,14 @@ export default function SuperuserManagementPage() {
         phone: "",
         groupId: "",
       });
+      if (data.plainPassword) {
+        setCredentialModal({
+          title: `Pengguna Baru: ${data.user?.name || ""}`,
+          list: [{ name: data.user?.name || "", username: data.user?.username || "", password: data.plainPassword }],
+        });
+      } else {
+        alert("Pengguna berhasil ditambahkan!");
+      }
       fetchUsers();
     } catch (err: any) {
       alert(err.message);
@@ -105,8 +122,15 @@ export default function SuperuserManagementPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal memperbarui pengguna");
-      alert("Data pengguna berhasil diperbarui!");
       setShowEditModal(false);
+      if (data.plainPassword) {
+        setCredentialModal({
+          title: `Password Diperbarui: ${data.user?.name || ""}`,
+          list: [{ name: data.user?.name || "", username: data.user?.username || "", password: data.plainPassword }],
+        });
+      } else {
+        alert("Data pengguna berhasil diperbarui!");
+      }
       setEditForm(null);
       fetchUsers();
     } catch (err: any) {
@@ -130,16 +154,21 @@ export default function SuperuserManagementPage() {
   };
 
   const handleQuickResetPassword = async (id: string, name: string) => {
-    if (!confirm(`Reset password untuk "${name}" menjadi default '123456'?`)) return;
+    const newPassword = generateRandomPassword();
+    if (!confirm(`Reset password untuk "${name}" menjadi password acak baru?`)) return;
     try {
       const res = await fetch("/api/admin/users", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, password: "123456" }),
+        body: JSON.stringify({ id, password: newPassword }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      alert(`Password untuk ${name} berhasil direset ke: 123456`);
+      const found = users.find((u) => u.id === id);
+      setCredentialModal({
+        title: `Password Diperbarui: ${name}`,
+        list: [{ name, username: found?.username || data.user?.username || "", password: newPassword }],
+      });
       fetchUsers();
     } catch (err: any) {
       alert(err.message);
@@ -195,7 +224,7 @@ export default function SuperuserManagementPage() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-sky-200">
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1">
@@ -203,18 +232,18 @@ export default function SuperuserManagementPage() {
               <span>Superuser Privilege</span>
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">
+          <h1 className="page-title">
             Manajemen Pengguna & Hak Akses
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="page-subtitle">
             Kontrol penuh CRUD akun Administrator, Guru Penguji, Operator Proktor, dan Siswa.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="header-actions">
           <button
             onClick={handleExportExcel}
-            className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5"
+            className="btn-secondary"
             title="Download Rekap Seluruh Pengguna ke Excel"
           >
             <Download className="w-4 h-4 text-emerald-400" />
@@ -223,7 +252,7 @@ export default function SuperuserManagementPage() {
 
           <Link
             href="/admin/users/import"
-            className="px-3.5 py-2.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-semibold transition flex items-center gap-1.5"
+            className="btn-secondary text-emerald-300 border-emerald-500/30"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
             <span>Import Excel / CSV</span>
@@ -231,7 +260,7 @@ export default function SuperuserManagementPage() {
 
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 flex items-center gap-2 transition shrink-0"
+            className="btn-primary"
           >
             <UserPlus className="w-4 h-4" />
             <span>Tambah Pengguna Baru</span>
@@ -240,7 +269,7 @@ export default function SuperuserManagementPage() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+      <div className="glass p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -248,7 +277,7 @@ export default function SuperuserManagementPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nama, username, atau NIS..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-xs text-slate-900 dark:text-black placeholder-slate-500 focus:outline-none focus:border-blue-500"
           />
         </div>
 
@@ -256,7 +285,7 @@ export default function SuperuserManagementPage() {
           <select
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
-            className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+            className="px-3.5 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-xs text-slate-900 dark:text-black focus:outline-none focus:border-blue-500"
           >
             <option value="ALL">Semua Hak Akses (Role)</option>
             <option value="ADMIN">Administrator (Superuser)</option>
@@ -268,7 +297,7 @@ export default function SuperuserManagementPage() {
           <select
             value={filterGroup}
             onChange={(e) => setFilterGroup(e.target.value)}
-            className="px-3.5 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+            className="px-3.5 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-xs text-slate-900 dark:text-black focus:outline-none focus:border-blue-500"
           >
             <option value="ALL">Semua Kelas / Rombel</option>
             {groups.map((g) => (
@@ -280,7 +309,7 @@ export default function SuperuserManagementPage() {
 
           <button
             onClick={fetchUsers}
-            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition"
+            className="p-2 bg-sky-100 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition"
             title="Segarkan"
           >
             <RefreshCw className="w-4 h-4" />
@@ -289,7 +318,7 @@ export default function SuperuserManagementPage() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div className="glass overflow-hidden">
         {loading ? (
           <div className="py-12 text-center text-xs text-slate-500">Memuat data pengguna...</div>
         ) : filteredUsers.length === 0 ? (
@@ -297,7 +326,7 @@ export default function SuperuserManagementPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-sky-50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-sky-200">
                 <tr>
                   <th className="py-3 px-4">Nama Lengkap</th>
                   <th className="py-3 px-4">Username</th>
@@ -310,8 +339,8 @@ export default function SuperuserManagementPage() {
               <tbody className="divide-y divide-slate-800/60">
                 {filteredUsers.map((user) => {
                   return (
-                    <tr key={user.id} className="hover:bg-slate-800/30 transition">
-                      <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
+                    <tr key={user.id} className="hover:bg-sky-100 transition">
+                      <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-black">
                         <div>{user.name}</div>
                         {user.nis && <div className="text-[10px] text-slate-500 font-mono">NIS: {user.nis}</div>}
                       </td>
@@ -376,7 +405,7 @@ export default function SuperuserManagementPage() {
                               });
                               setShowEditModal(true);
                             }}
-                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-slate-900 dark:text-white rounded-lg transition"
+                            className="p-1.5 bg-sky-100 hover:bg-slate-700 text-blue-400 hover:text-slate-900 dark:text-black rounded-lg transition"
                             title="Edit Data & Role Pengguna"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -384,8 +413,8 @@ export default function SuperuserManagementPage() {
 
                           <button
                             onClick={() => handleQuickResetPassword(user.id, user.name)}
-                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-slate-900 dark:text-white rounded-lg transition"
-                            title="Reset Password ke 123456"
+                            className="p-1.5 bg-sky-100 hover:bg-slate-700 text-amber-400 hover:text-slate-900 dark:text-black rounded-lg transition"
+                            title="Reset Password ke acak"
                           >
                             <Key className="w-3.5 h-3.5" />
                           </button>
@@ -393,7 +422,7 @@ export default function SuperuserManagementPage() {
                           {user.deviceFingerprint && (
                             <button
                               onClick={() => handleUnlockDevice(user.id, user.name)}
-                              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-purple-400 hover:text-slate-900 dark:text-white rounded-lg transition"
+                              className="p-1.5 bg-sky-100 hover:bg-slate-700 text-purple-400 hover:text-slate-900 dark:text-black rounded-lg transition"
                               title="Buka Kunci Perangkat"
                             >
                               <Unlock className="w-3.5 h-3.5" />
@@ -402,7 +431,7 @@ export default function SuperuserManagementPage() {
 
                           <button
                             onClick={() => handleDeleteUser(user.id, user.name)}
-                            className="p-1.5 bg-slate-800 hover:bg-rose-600 text-rose-400 hover:text-slate-900 dark:text-white rounded-lg transition"
+                            className="p-1.5 bg-sky-100 hover:bg-rose-600 text-rose-400 hover:text-slate-900 dark:text-black rounded-lg transition"
                             title="Hapus Pengguna"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -420,9 +449,9 @@ export default function SuperuserManagementPage() {
 
       {/* Modal Create User */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-in zoom-in-95">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Tambah Pengguna Baru</h2>
+        <div className="fixed inset-0 bg-sky-950/25 backdrop-blur-xs backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass p-6 max-w-lg w-full animate-in zoom-in-95">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-black mb-1">Tambah Pengguna Baru</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">Pilih role hak akses dan isi kredensial akun.</p>
 
             <form onSubmit={handleCreateUser} className="space-y-4 text-xs">
@@ -432,7 +461,7 @@ export default function SuperuserManagementPage() {
                   <select
                     value={createForm.role}
                     onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-semibold"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black font-semibold"
                   >
                     <option value="ADMIN">ADMINISTRATOR (Superuser)</option>
                     <option value="TEACHER">GURU / PENGUJI</option>
@@ -445,7 +474,7 @@ export default function SuperuserManagementPage() {
                   <select
                     value={createForm.groupId}
                     onChange={(e) => setCreateForm({ ...createForm, groupId: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black"
                   >
                     <option value="">Tanpa Kelas</option>
                     {groups.map((g) => (
@@ -465,7 +494,7 @@ export default function SuperuserManagementPage() {
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                   placeholder="misal: Dr. Budi Santoso, M.Kom"
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black"
                 />
               </div>
 
@@ -478,7 +507,7 @@ export default function SuperuserManagementPage() {
                     value={createForm.username}
                     onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
                     placeholder="misal: budi_santoso"
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black font-mono"
                   />
                 </div>
                 <div>
@@ -489,7 +518,7 @@ export default function SuperuserManagementPage() {
                     value={createForm.password}
                     onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
                     placeholder="Password akun"
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black font-mono"
                   />
                 </div>
               </div>
@@ -502,7 +531,7 @@ export default function SuperuserManagementPage() {
                     value={createForm.nis}
                     onChange={(e) => setCreateForm({ ...createForm, nis: e.target.value })}
                     placeholder="Nomor identitas"
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black font-mono"
                   />
                 </div>
                 <div>
@@ -512,16 +541,16 @@ export default function SuperuserManagementPage() {
                     value={createForm.email}
                     onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                     placeholder="email@sekolah.sch.id"
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-sky-200">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold"
+                  className="px-4 py-2 bg-sky-100 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold"
                 >
                   Batal
                 </button>
@@ -539,9 +568,9 @@ export default function SuperuserManagementPage() {
 
       {/* Modal Edit User */}
       {showEditModal && editForm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-in zoom-in-95">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Edit Pengguna: {editForm.name}</h2>
+        <div className="fixed inset-0 bg-sky-950/25 backdrop-blur-xs backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass p-6 max-w-lg w-full animate-in zoom-in-95">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-black mb-1">Edit Pengguna: {editForm.name}</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">Ubah hak akses, nama, atau reset password pengguna.</p>
 
             <form onSubmit={handleUpdateUser} className="space-y-4 text-xs">
@@ -551,7 +580,7 @@ export default function SuperuserManagementPage() {
                   <select
                     value={editForm.role}
                     onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-semibold"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black font-semibold"
                   >
                     <option value="ADMIN">ADMINISTRATOR (Superuser)</option>
                     <option value="TEACHER">GURU / PENGUJI</option>
@@ -564,7 +593,7 @@ export default function SuperuserManagementPage() {
                   <select
                     value={editForm.groupId || ""}
                     onChange={(e) => setEditForm({ ...editForm, groupId: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black"
                   >
                     <option value="">Tanpa Kelas</option>
                     {groups.map((g) => (
@@ -583,7 +612,7 @@ export default function SuperuserManagementPage() {
                   required
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black"
                 />
               </div>
 
@@ -595,7 +624,7 @@ export default function SuperuserManagementPage() {
                     required
                     value={editForm.username}
                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black font-mono"
                   />
                 </div>
                 <div>
@@ -605,7 +634,7 @@ export default function SuperuserManagementPage() {
                     value={editForm.password || ""}
                     onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                     placeholder="Kosongkan jika tetap"
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black font-mono"
                   />
                 </div>
               </div>
@@ -617,7 +646,7 @@ export default function SuperuserManagementPage() {
                     type="text"
                     value={editForm.nis || ""}
                     onChange={(e) => setEditForm({ ...editForm, nis: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black font-mono"
                   />
                 </div>
                 <div>
@@ -625,7 +654,7 @@ export default function SuperuserManagementPage() {
                   <select
                     value={editForm.isActive ? "1" : "0"}
                     onChange={(e) => setEditForm({ ...editForm, isActive: e.target.value === "1" })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black"
                   >
                     <option value="1">Aktif</option>
                     <option value="0">Nonaktif / Diblokir</option>
@@ -633,11 +662,11 @@ export default function SuperuserManagementPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-sky-200">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold"
+                  className="px-4 py-2 bg-sky-100 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold"
                 >
                   Batal
                 </button>
@@ -649,6 +678,47 @@ export default function SuperuserManagementPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Hasil Generate/Reset Password (tampil SEKALI) */}
+      {credentialModal && (
+        <div className="fixed inset-0 bg-sky-950/25 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-black flex items-center gap-2">
+                <Key className="w-4 h-4 text-emerald-400" />
+                <span>{credentialModal.title}</span>
+              </h3>
+              <button
+                onClick={() => setCredentialModal(null)}
+                className="p-2 bg-sky-100 hover:bg-slate-700 text-slate-400 rounded-lg text-xs"
+              >
+                Tutup
+              </button>
+            </div>
+            <p className="text-[11px] text-amber-500 bg-amber-500/10 border border-amber-500/25 rounded-lg px-3 py-2">
+              Password hanya ditampilkan SEKALI. Simpan segera - tidak dapat diambil ulang.
+            </p>
+            <div className="overflow-x-auto border border-slate-200 dark:border-sky-200 rounded-xl">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-sky-50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-sky-200">
+                  <tr>
+                    <th className="py-2.5 px-3">Username</th>
+                    <th className="py-2.5 px-3">Password</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {credentialModal.list.map((c: any, idx: number) => (
+                    <tr key={idx}>
+                      <td className="py-2.5 px-3 font-mono font-bold text-slate-700 dark:text-slate-300">{c.username}</td>
+                      <td className="py-2.5 px-3 font-mono font-bold text-emerald-500">{c.password}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

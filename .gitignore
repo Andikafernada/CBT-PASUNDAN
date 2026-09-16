@@ -1,39 +1,49 @@
 # Dependencies
-node_modules/
-.pnp
+/node_modules
+/.pnp
 .pnp.js
 
-# Testing
-coverage/
+# Build output
+/.next/
+/out/
+/build
 
-# Next.js Build Output
-.next/
-out/
-build/
-dist/
-
-# Environment variables & secrets
+# Environment files — NEVER commit these!
 .env
-.env*.local
-.env.production
-.env.staging
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Logs
+# Sensitive files
+*.docx
+*.xlsx
+*.sql
+*.bak
+
+# Runtime
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
+.pnpm-debug.log*
+
+# OS
+.DS_Store
+*.pem
+Thumbs.db
+
+# Prisma
+prisma/migrations/
+prisma/*.db
+prisma/*.db-journal
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs
+/var/log/
 *.log
 
-# Temporary build archives & scripts temp
-*.zip
-scripts/temp_varied_images/
-scripts/temp_extracted/
-*.docx
-!BANK_SOAL_50_KOMPLET_MTK_ARAB_JEPANG.docx
-!BANK_SOAL_40_LINUX_DEBIAN12_VBOX.docx
-
-# OS metadata
-.DS_Store
-Thumbs.db
-*.pem
+# PM2
+ecosystem.config.js.bak

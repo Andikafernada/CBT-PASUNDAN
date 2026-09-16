@@ -2,8 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
-
-const JWT_SECRET = process.env.JWT_SECRET || "modern-cbt-secret-key-2026";
+import { JWT_SECRET } from "./secret";
 
 export interface TokenPayload {
   userId: string;
@@ -48,4 +47,21 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash);
+}
+
+// Generate password acak 8 karakter alfanumerik yang aman untuk dicetak di kartu.
+// Password asli hanya dikembalikan sekali saat create/import/reset, lalu TIDAK disimpan (hanya hash).
+export function generateRandomPassword(length: number = 8): string {
+  const charset = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"; // tanpa karakter ambigu O/0/I/l/1
+  let password = "";
+  const randomValues = new Uint32Array(length);
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    crypto.getRandomValues(randomValues);
+  } else {
+    for (let i = 0; i < length; i++) randomValues[i] = Math.floor(Math.random() * 0xffffffff);
+  }
+  for (let i = 0; i < length; i++) {
+    password += charset[randomValues[i] % charset.length];
+  }
+  return password;
 }

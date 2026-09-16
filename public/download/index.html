@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download CBT Exambrowser - SMK Pasundan 2 Bandung</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 580px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    .logo {
+      width: 72px;
+      height: 72px;
+      background: #0284c7;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+    }
+    h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; color: #f8fafc; }
+    p.sub { font-size: 14px; color: #94a3b8; margin-bottom: 28px; line-height: 1.5; }
+    .btn-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: white;
+      text-decoration: none;
+      padding: 16px 24px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.5);
+      transition: transform 0.15s ease, background 0.15s ease;
+      margin-bottom: 14px;
+    }
+    .btn-main:hover { transform: translateY(-2px); background: #0284c7; }
+    .btn-sec {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #334155;
+      color: #e2e8f0;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 4px;
+      transition: background 0.15s ease;
+    }
+    .btn-sec:hover { background: #475569; }
+    .box-code {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 24px;
+      text-align: left;
+    }
+    .box-code p { font-size: 11px; font-weight: 700; color: #38bdf8; margin-bottom: 6px; text-transform: uppercase; }
+    .box-code code {
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      color: #34d399;
+      display: block;
+      word-break: break-all;
+      user-select: all;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🛡️</div>
+    <h1>Portal CBT Exambrowser</h1>
+    <p class="sub">SMK Pasundan 2 Bandung &bull; Laboratorium Komputer (Lab 1 s/d Lab 7)<br>Khusus PC Peserta Ujian STS Gasal 2026</p>
+
+    <a href="/download/CBT_EXAMBROWSER.exe" class="btn-main">
+      <span>⬇️</span>
+      <span>Download CBT_EXAMBROWSER.exe (21.7 MB)</span>
+    </a>
+
+    <div style="margin-bottom: 20px;">
+      <a href="/download/EXAMBRO_LAB.zip" class="btn-sec">📦 Paket Lengkap (ZIP)</a>
+      <a href="/download/PASANG_EXAMBRO.bat" class="btn-sec">⚡ Installer Otomatis (.BAT)</a>
+      <a href="/download/config.json" class="btn-sec">⚙️ config.json</a>
+    </div>
+
+    <div class="box-code">
+      <p>Perintah Pasang Cepat di CMD / PowerShell PC Lab:</p>
+      <code>curl -o "%PUBLIC%\Desktop\CBT_EXAMBROWSER.exe" http://172.16.0.210/download/CBT_EXAMBROWSER.exe</code>
+    </div>
+  </div>
+</body>
+</html>

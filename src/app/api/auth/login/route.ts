@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { signToken, verifyPassword } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limiter";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const { username, password, deviceFingerprint: reqFingerprint } = body;
+
+    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1";
+    // 🛡️ Redis Rate Limiting (Anti-Brute Force: Max 10 attempts per minute per IP / username)
+    const rateLimitKey = `login:${clientIp.split(",")[0].trim()}:${username || "anon"}`;
+    const rl = await checkRateLimit(rateLimitKey, 10, 60);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: `Terlalu banyak percobaan login. Silakan tunggu ${rl.resetSec} detik sebelum mencoba kembali.` },
+        { status: 429, headers: { "Retry-After": String(rl.resetSec) } }
+      );
+    }
 
     if (!username || !password) {
       return NextResponse.json(
@@ -33,13 +45,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify password (plain text fallback for initial migrated data or bcrypt hash)
+    // Verify password (bcrypt only — no plain text fallback for security)
     let isMatch = false;
     if (user.password.startsWith("$2a$") || user.password.startsWith("$2b$") || user.password.startsWith("$2y$")) {
       isMatch = await verifyPassword(password, user.password);
     } else {
-      // Legacy plain text check
-      isMatch = user.password === password;
+      // Password not hashed — reject and prompt admin to reset
+      console.warn(`[Security] User ${user.username} has unhashed password. Please run db:seed or reset password.`);
+      isMatch = false;
     }
 
     if (!isMatch) {
@@ -49,9 +62,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1";
     const userAgent = req.headers.get("user-agent") || "";
     const activeFingerprint = reqFingerprint || Buffer.from(`${userAgent}-${clientIp}`).toString("base64").substring(0, 32);
+
+    // 🛡️ KIOSK EXAMBROWSER ENFORCEMENT AT LOGIN
+    // Siswa Reguler WAJIB login via CBT Exambrowser di Lab.
+    // Hanya siswa PKL / Siswa yang di-Bypass yang boleh login via Chrome / HP biasa.
+    if (user.role === "STUDENT") {
+      const isBypassed = Boolean((user as any).bypassExambro || user.group?.isPkl || (user.group as any)?.bypassExambro);
+      if (!isBypassed) {
+        const sebHeader = req.headers.get("x-safeexambrowser-requesthash");
+        const pattern = /Exambro|SafeExamBrowser/i;
+        const isKiosk = pattern.test(userAgent) || !!sebHeader;
+
+        if (!isKiosk) {
+          return NextResponse.json(
+            {
+              error: "Akses Ditolak: Anda terdaftar sebagai siswa Reguler Lab dan WAJIB login melalui aplikasi resmi CBT Exambrowser di komputer lab! Browser biasa (Chrome / Edge / HP) tidak diizinkan.",
+              isKioskRequired: true,
+            },
+            { status: 403 }
+          );
+        }
+      }
+    }
 
     // Single Device Lock Check (For Students)
     if (user.role === "STUDENT") {

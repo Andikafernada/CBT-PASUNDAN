@@ -42,7 +42,10 @@ export default function PrintMinutesPage() {
       const res = await fetch("/api/admin/exams");
       const data = await res.json();
       setExams(data.exams || []);
-      if (data.exams?.length > 0) {
+      const urlExamId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("examId") : null;
+      if (urlExamId && data.exams?.some((e: any) => e.id === urlExamId)) {
+        setSelectedExam(urlExamId);
+      } else if (data.exams?.length > 0) {
         setSelectedExam(data.exams[0].id);
       }
     } catch (e) {
@@ -61,11 +64,11 @@ export default function PrintMinutesPage() {
   return (
     <div className="space-y-6">
       {/* Control Header - Hidden on Print */}
-      <div className="print:hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="print:hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-sky-300">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/dashboard"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition"
+            className="p-2 rounded-xl bg-sky-100 border border-sky-300 text-slate-400 hover:text-white transition"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
@@ -83,7 +86,7 @@ export default function PrintMinutesPage() {
             className={`p-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
               showConfig
                 ? "bg-purple-600 text-white border-purple-500"
-                : "bg-slate-900 text-slate-300 border-slate-800 hover:text-white"
+                : "bg-sky-100 text-slate-300 border-sky-300 hover:text-white"
             }`}
           >
             <Settings2 className="w-4 h-4" />
@@ -93,7 +96,7 @@ export default function PrintMinutesPage() {
           <select
             value={selectedExam}
             onChange={(e) => setSelectedExam(e.target.value)}
-            className="px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+            className="px-3.5 py-2 bg-sky-100 border border-sky-300 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
           >
             {exams.map((ex) => (
               <option key={ex.id} value={ex.id}>
@@ -114,7 +117,7 @@ export default function PrintMinutesPage() {
 
       {/* Config Form (Hidden on Print) */}
       {showConfig && (
-        <div className="print:hidden bg-slate-900 border border-slate-800 rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs animate-in fade-in">
+        <div className="print:hidden bg-sky-100 border border-sky-300 rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs animate-in fade-in">
           <div>
             <label className="block text-slate-400 font-semibold mb-1">Hari & Tanggal</label>
             <div className="flex gap-2">
@@ -123,14 +126,14 @@ export default function PrintMinutesPage() {
                 value={dayName}
                 onChange={(e) => setDayName(e.target.value)}
                 placeholder="Hari (e.g. Senin)"
-                className="w-1/3 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                className="w-1/3 px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
               />
               <input
                 type="text"
                 value={examDateStr}
                 onChange={(e) => setExamDateStr(e.target.value)}
                 placeholder="Tanggal Lengkap"
-                className="w-2/3 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                className="w-2/3 px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
               />
             </div>
           </div>
@@ -141,13 +144,13 @@ export default function PrintMinutesPage() {
                 type="text"
                 value={roomName}
                 onChange={(e) => setRoomName(e.target.value)}
-                className="w-1/2 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                className="w-1/2 px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
               />
               <input
                 type="text"
                 value={sessionName}
                 onChange={(e) => setSessionName(e.target.value)}
-                className="w-1/2 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                className="w-1/2 px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
               />
             </div>
           </div>
@@ -158,19 +161,19 @@ export default function PrintMinutesPage() {
                 type="number"
                 value={registeredCount}
                 onChange={(e) => setRegisteredCount(Number(e.target.value))}
-                className="w-1/3 px-2 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                className="w-1/3 px-2 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
               />
               <input
                 type="number"
                 value={presentCount}
                 onChange={(e) => setPresentCount(Number(e.target.value))}
-                className="w-1/3 px-2 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                className="w-1/3 px-2 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
               />
               <input
                 type="number"
                 value={absentCount}
                 onChange={(e) => setAbsentCount(Number(e.target.value))}
-                className="w-1/3 px-2 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+                className="w-1/3 px-2 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
               />
             </div>
           </div>
@@ -180,7 +183,7 @@ export default function PrintMinutesPage() {
               type="text"
               value={invigilatorName}
               onChange={(e) => setInvigilatorName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+              className="w-full px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
             />
           </div>
           <div>
@@ -189,7 +192,7 @@ export default function PrintMinutesPage() {
               type="text"
               value={proctorName}
               onChange={(e) => setProctorName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+              className="w-full px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
             />
           </div>
           <div>
@@ -198,7 +201,7 @@ export default function PrintMinutesPage() {
               type="text"
               value={technicianName}
               onChange={(e) => setTechnicianName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+              className="w-full px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
             />
           </div>
           <div className="sm:col-span-3">
@@ -207,7 +210,7 @@ export default function PrintMinutesPage() {
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white"
+              className="w-full px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white"
             />
           </div>
         </div>
@@ -223,7 +226,7 @@ export default function PrintMinutesPage() {
           <p className="text-xs text-slate-600 font-medium">{schoolAddress}</p>
           <div className="border-t border-slate-900 mt-3 pt-2">
             <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">
-              BERITA ACARA PELAKSANAAN ASESMEN BERBASIS KOMPUTER (CBT)
+              BERITA ACARA PELAKSANAAN CBT HEBAT - ASESMEN BERBASIS KOMPUTER
             </h3>
             <p className="text-xs font-bold text-slate-700">TAHUN AJARAN {academicYear}</p>
           </div>
@@ -232,7 +235,7 @@ export default function PrintMinutesPage() {
         {/* Statement Body */}
         <div className="text-xs leading-relaxed space-y-4">
           <p>
-            Pada hari ini <strong>{dayName}</strong> tanggal <strong>{examDateStr}</strong>, di <strong>{schoolName}</strong> telah diselenggarakan Asesmen Berbasis Komputer (CBT) untuk:
+            Pada hari ini <strong>{dayName}</strong> tanggal <strong>{examDateStr}</strong>, di <strong>{schoolName}</strong> telah diselenggarakan CBT HEBAT - Asesmen Berbasis Komputer untuk:
           </p>
 
           <table className="w-full text-xs ml-4 border-none">

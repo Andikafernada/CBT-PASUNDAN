@@ -1,15 +1,42 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { GraduationCap, Lock, User, ShieldAlert, ArrowRight, Loader2 } from "lucide-react";
+import {
+  GraduationCap,
+  Lock,
+  User,
+  ShieldAlert,
+  ArrowRight,
+  Loader2,
+  Sparkles,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
+function getOrCreateDeviceFingerprint(): string {
+  try {
+    if (typeof window === "undefined") return "";
+    let devId = localStorage.getItem("cbt_device_uuid");
+    if (!devId) {
+      if (typeof window.crypto !== "undefined" && typeof window.crypto.randomUUID === "function") {
+        devId = window.crypto.randomUUID();
+      } else {
+        devId = "dev-" + Math.random().toString(36).substring(2, 12) + "-" + Date.now().toString(36);
+      }
+      localStorage.setItem("cbt_device_uuid", devId);
+    }
+    const screenRes = typeof window.screen !== "undefined" ? `${window.screen.width}x${window.screen.height}` : "desktop";
+    return `FP-${devId.substring(0, 16)}-${screenRes}`;
+  } catch {
+    return "";
+  }
+}
+
 export default function LoginPage() {
-  const router = useRouter();
-  const [roleTab, setRoleTab] = useState<"STUDENT" | "ADMIN">("STUDENT");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,82 +45,80 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
+    const deviceFingerprint = getOrCreateDeviceFingerprint();
+
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, deviceFingerprint }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Gagal masuk");
+        throw new Error(data.error || "Gagal masuk. Periksa username dan password Anda.");
       }
 
-      window.location.href = data.redirectTo || (roleTab === "STUDENT" ? "/student/dashboard" : "/admin/dashboard");
+      window.location.href = data.redirectTo || "/";
     } catch (err: any) {
-      setError(err.message || "Terjadi kesalahan pada login");
+      setError(err.message || "Terjadi kesalahan pada koneksi server.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/80 dark:bg-slate-950 flex flex-col justify-center items-center p-4 selection:bg-blue-600 selection:text-white transition-colors duration-150 relative">
-      {/* Top Floating Theme Switcher */}
-      <div className="absolute top-4 right-4 z-20">
+    <div className="relative min-h-screen flex flex-col justify-center items-center p-4 bg-gradient-to-br from-sky-50 via-blue-50 to-sky-100 text-black transition-colors duration-150 overflow-hidden">
+      {/* Soft Blue Decorative Blur Blobs */}
+      <div className="pointer-events-none absolute -top-32 -left-32 w-96 h-96 rounded-full bg-sky-200/70 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -right-32 w-[28rem] h-[28rem] rounded-full bg-blue-200/60 blur-3xl" />
+      <div className="pointer-events-none absolute top-1/3 right-[-8rem] w-72 h-72 rounded-full bg-sky-300/40 blur-3xl" />
+
+      {/* Top Floating Header Controls */}
+      <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20 max-w-7xl mx-auto">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-sky-300 text-xs font-black text-black shadow-soft backdrop-blur-md">
+          <span className="w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse" />
+          <span>Server CBT Online</span>
+        </div>
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Brand Logo */}
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 mb-3 border border-blue-400/30">
-            <GraduationCap className="w-8 h-8 text-white" />
+      <div className="w-full max-w-md relative z-10 animate-fade-up">
+        {/* Brand Header */}
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-3xl gradient-brand flex items-center justify-center shadow-glow border border-sky-300">
+              <GraduationCap className="w-9 h-9 text-black" />
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-xl bg-white border border-sky-300 flex items-center justify-center shadow-md">
+              <Sparkles className="w-3.5 h-3.5 text-black" />
+            </div>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            CBT <span className="text-blue-600 dark:text-blue-400">SMK Pasundan 2</span>
+          <h1 className="mt-4 text-2xl font-black text-black tracking-tight">
+            CBT HEBAT
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Sistem Ujian Berbasis Komputer & Asesmen Terintegrasi</p>
+          <p className="text-xs text-black mt-1 font-bold">
+            SMK PASUNDAN 2 Bandung
+          </p>
+          <p className="text-[11px] text-slate-700 mt-0.5 max-w-xs font-semibold">
+            Platform Ujian Berbasis Komputer & Asesmen Terintegrasi
+          </p>
         </div>
 
-        {/* Card Box */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-xl">
-          {/* Role Tabs */}
-          <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-950 rounded-xl mb-6 border border-slate-200 dark:border-slate-800/80">
-            <button
-              type="button"
-              onClick={() => {
-                setRoleTab("STUDENT");
-                setError(null);
-              }}
-              className={`py-2 text-xs font-semibold rounded-lg transition ${
-                roleTab === "STUDENT"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-              }`}
-            >
-              Peserta Ujian (Siswa)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setRoleTab("ADMIN");
-                setError(null);
-              }}
-              className={`py-2 text-xs font-semibold rounded-lg transition ${
-                roleTab === "ADMIN"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-              }`}
-            >
-              Guru / Administrator
-            </button>
+        {/* Login Card */}
+        <div className="glass p-6 sm:p-8 rounded-3xl shadow-soft">
+          <div className="mb-5 text-center">
+            <h2 className="text-base font-black text-black tracking-tight">
+              Masuk ke Akun Anda
+            </h2>
+            <p className="text-xs text-black mt-1 font-semibold">
+              Silakan masukkan Username / NIS dan Kata Sandi terdaftar.
+            </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 flex items-start gap-3 text-rose-600 dark:text-rose-400 text-xs">
+            <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-600 text-xs font-bold">
               <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
@@ -101,61 +126,76 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                {roleTab === "STUDENT" ? "Nomor Peserta / Username" : "Username Pengawas / Admin / Guru"}
+              <label className="block text-xs font-black text-black mb-1.5">
+                Username / NIS
               </label>
-              <div className="relative">
-                <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <div className="relative group">
+                <User className="w-4 h-4 text-black absolute left-3.5 top-1/2 -translate-y-1/2 transition" />
                 <input
                   type="text"
                   required
+                  autoFocus
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder={roleTab === "STUDENT" ? "Ketik username / NIS..." : "Ketik username guru/admin..."}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                  placeholder="Masukkan Username atau NIS..."
+                  className="form-input pl-10"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-black text-black mb-1.5">
                 Kata Sandi (Password)
               </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <div className="relative group">
+                <Lock className="w-4 h-4 text-black absolute left-3.5 top-1/2 -translate-y-1/2 transition" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                  className="form-input pl-10 pr-12"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-sky-800 transition p-1 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4 text-black" /> : <Eye className="w-4 h-4 text-black" />}
+                </button>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-2 py-3.5 btn-primary justify-center text-sm font-black shadow-glow"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Memverifikasi...</span>
+                  <Loader2 className="w-4 h-4 animate-spin text-black" />
+                  <span className="text-black font-black">Memverifikasi Akun...</span>
                 </>
               ) : (
                 <>
-                  <span>Masuk ke Sistem</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span className="text-black font-black">Masuk ke Sistem</span>
+                  <ArrowRight className="w-4 h-4 text-black" />
                 </>
               )}
             </button>
           </form>
         </div>
 
-        <div className="text-center mt-6 text-xs text-slate-500 dark:text-slate-400 font-medium">
-          CBT SMK Pasundan 2 Bandung • <span className="font-semibold text-slate-700 dark:text-slate-300">Development by Andika Fernanda</span>
+        {/* Footer info */}
+        <div className="flex items-center justify-center gap-2 mt-6 text-xs text-black font-bold">
+          <span className="h-px w-8 bg-sky-300" />
+          CBT HEBAT SMK PASUNDAN 2 Bandung
+          <span className="h-px w-8 bg-sky-300" />
+        </div>
+        <div className="text-center mt-1 text-[11px] text-black font-semibold">
+          Development by <span className="font-black text-black">Andika Fernanda</span>
         </div>
       </div>
     </div>

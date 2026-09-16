@@ -1,6 +1,6 @@
 "use client";
 
-// IndexedDB Helper for CBT Student Exam Offline Resilience
+// IndexedDB Helper for CBT Student Exam Offline Resilience & Batch Disaster Recovery
 const DB_NAME = "zyacbt_exam_db";
 const DB_VERSION = 1;
 
@@ -55,28 +55,78 @@ export const ExamLocalDB = {
     }
   },
 
+  // ⚡ Live Answer Cache Update: keeps exam_cache updated with all answers selected
+  async updateCachedQuestions(examId: string, updatedQuestions: any[]): Promise<void> {
+    try {
+      // Always update localStorage fast backup first
+      try {
+        localStorage.setItem(`cbt_backup_${examId}`, JSON.stringify(updatedQuestions));
+      } catch {}
+
+      const db = await openDB();
+      const tx = db.transaction("exam_cache", "readwrite");
+      const store = tx.objectStore("exam_cache");
+      const req = store.get(examId);
+
+      req.onsuccess = () => {
+        if (req.result && req.result.payload) {
+          req.result.payload.questions = updatedQuestions;
+          req.result.updatedAt = Date.now();
+          store.put(req.result);
+        }
+      };
+    } catch {}
+  },
+
   async getExamCache(examId: string): Promise<any | null> {
+    let payload: any = null;
+
     try {
       const db = await openDB();
       const tx = db.transaction("exam_cache", "readonly");
       const store = tx.objectStore("exam_cache");
       const req = store.get(examId);
 
-      return new Promise((resolve) => {
+      payload = await new Promise((resolve) => {
         req.onsuccess = () => {
           resolve(req.result ? req.result.payload : null);
         };
         req.onerror = () => resolve(null);
       });
     } catch {
-      // Fallback
       try {
         const raw = localStorage.getItem(`cbt_cache_${examId}`);
-        return raw ? JSON.parse(raw) : null;
-      } catch {
-        return null;
-      }
+        payload = raw ? JSON.parse(raw) : null;
+      } catch {}
     }
+
+    // Smart Merge with localStorage backup if questions have newer answers
+    try {
+      const localBackupRaw = localStorage.getItem(`cbt_backup_${examId}`);
+      if (localBackupRaw && payload && Array.isArray(payload.questions)) {
+        const localQuestions: any[] = JSON.parse(localBackupRaw);
+        const localMap = new Map<string, any>();
+        localQuestions.forEach((q) => {
+          if (q.id && q.answer) localMap.set(q.id, q.answer);
+        });
+
+        payload.questions = payload.questions.map((q: any) => {
+          const localAns = localMap.get(q.id);
+          if (localAns) {
+            const hasLocalSelected = Array.isArray(localAns.selectedOptionIds) && localAns.selectedOptionIds.length > 0;
+            const hasLocalText = localAns.textAnswer && localAns.textAnswer.trim() !== "";
+            const hasLocalMatching = localAns.matchingAnswer && Object.keys(localAns.matchingAnswer).length > 0;
+
+            if (hasLocalSelected || hasLocalText || hasLocalMatching) {
+              return { ...q, answer: { ...q.answer, ...localAns } };
+            }
+          }
+          return q;
+        });
+      }
+    } catch {}
+
+    return payload;
   },
 
   // 2. Queue answers for background sync
@@ -154,6 +204,64 @@ export const ExamLocalDB = {
           localStorage.setItem(qKey, JSON.stringify(filtered));
         } catch {}
       }
+    }
+  },
+
+  // 3. ⚡ BATCH DISASTER RECOVERY: Flush entire queue in single bulk HTTP request
+  async flushPendingAnswersBulk(examId: string): Promise<{
+    success: boolean;
+    syncedCount: number;
+    serverRemainingSeconds?: number;
+    error?: string;
+  }> {
+    try {
+      const pending = await this.getPendingAnswers(examId);
+      if (!Array.isArray(pending) || pending.length === 0) {
+        return { success: true, syncedCount: 0 };
+      }
+
+      // Consolidate answers: deduplicate by questionId (latest wins)
+      const answersMap = new Map<string, any>();
+      for (const item of pending) {
+        const payload = item.payload || item;
+        if (payload?.questionId) {
+          answersMap.set(payload.questionId, payload);
+        }
+      }
+
+      const answers = Array.from(answersMap.values());
+
+      const res = await fetch(`/api/student/exams/${examId}/save-answer-bulk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        return { success: false, syncedCount: 0, error: err.error || "Batch sync failed" };
+      }
+
+      const resData = await res.json().catch(() => ({}));
+
+      // On successful bulk save, clear synced items from queue
+      for (const item of pending) {
+        const payload = item.payload || item;
+        await this.removePendingAnswer(item.id, examId, payload?.questionId);
+      }
+
+      // Also clean localStorage fallback queue
+      try {
+        localStorage.removeItem(`cbt_queue_${examId}`);
+      } catch {}
+
+      return {
+        success: true,
+        syncedCount: resData.savedCount || answers.length,
+        serverRemainingSeconds: resData.serverRemainingSeconds,
+      };
+    } catch (e: any) {
+      return { success: false, syncedCount: 0, error: e?.message };
     }
   },
 

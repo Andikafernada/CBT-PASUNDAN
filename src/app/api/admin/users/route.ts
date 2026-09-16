@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSessionUser, hashPassword } from "@/lib/auth";
+import { getSessionUser, hashPassword, generateRandomPassword } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
     const sessionUser = await getSessionUser();
-    if (!sessionUser || sessionUser.role !== "ADMIN") {
+    if (!sessionUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (sessionUser.role !== "ADMIN") {
       return NextResponse.json({ error: "Akses khusus Superuser / Administrator" }, { status: 403 });
     }
 
@@ -45,7 +48,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const sessionUser = await getSessionUser();
-    if (!sessionUser || sessionUser.role !== "ADMIN") {
+    if (!sessionUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (sessionUser.role !== "ADMIN") {
       return NextResponse.json({ error: "Akses khusus Superuser / Administrator" }, { status: 403 });
     }
 
@@ -91,7 +97,10 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const sessionUser = await getSessionUser();
-    if (!sessionUser || sessionUser.role !== "ADMIN") {
+    if (!sessionUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (sessionUser.role !== "ADMIN") {
       return NextResponse.json({ error: "Akses khusus Superuser / Administrator" }, { status: 403 });
     }
 
@@ -99,13 +108,26 @@ export async function PUT(req: NextRequest) {
 
     if (body.action === "BULK_RESET_PASSWORD") {
       const { ids, newPassword } = body;
-      const passToSet = newPassword && newPassword.trim() !== "" ? newPassword.trim() : "123";
-      const hashedPassword = await hashPassword(passToSet);
-      const updated = await prisma.user.updateMany({
-        where: { id: { in: ids } },
-        data: { password: hashedPassword },
-      });
-      return NextResponse.json({ success: true, count: updated.count, defaultPassword: passToSet });
+      const useCustom = newPassword && newPassword.trim() !== "";
+      const requested = useCustom ? newPassword.trim() : "";
+      const passwords: { id: string; username: string; name: string; password: string }[] = [];
+
+      for (const id of ids) {
+        const existing = await prisma.user.findUnique({
+          where: { id },
+          select: { username: true, name: true },
+        });
+        const pass = useCustom ? requested : generateRandomPassword();
+        const hashedPassword = await hashPassword(pass);
+        await prisma.user.update({ where: { id }, data: { password: hashedPassword } });
+        if (existing) {
+          passwords.push({ id, username: existing.username, name: existing.name, password: pass });
+        }
+      }
+      if (useCustom) {
+        return NextResponse.json({ success: true, count: passwords.length, defaultPassword: requested });
+      }
+      return NextResponse.json({ success: true, count: passwords.length, passwords });
     }
 
     if (body.action === "BULK_RESET_DEVICE") {
@@ -146,7 +168,8 @@ export async function PUT(req: NextRequest) {
       if (!isLoginLocked) updateData.deviceFingerprint = null;
     }
 
-    if (password && password.trim() !== "") {
+    const passwordChanged = password && password.trim() !== "";
+    if (passwordChanged) {
       updateData.password = await hashPassword(password);
     }
 
@@ -156,7 +179,11 @@ export async function PUT(req: NextRequest) {
       include: { group: true },
     });
 
-    return NextResponse.json({ success: true, user: updatedUser });
+    return NextResponse.json({
+      success: true,
+      user: updatedUser,
+      plainPassword: passwordChanged ? password : undefined,
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -165,7 +192,10 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const sessionUser = await getSessionUser();
-    if (!sessionUser || sessionUser.role !== "ADMIN") {
+    if (!sessionUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (sessionUser.role !== "ADMIN") {
       return NextResponse.json({ error: "Akses khusus Superuser / Administrator" }, { status: 403 });
     }
 
@@ -185,7 +215,6 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "ID pengguna wajib disertakan" }, { status: 400 });
     }
 
-    // Prevent deleting own session
     if (id === sessionUser.id) {
       return NextResponse.json({ error: "Tidak dapat menghapus akun Anda sendiri yang sedang aktif" }, { status: 400 });
     }

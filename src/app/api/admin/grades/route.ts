@@ -25,7 +25,6 @@ export async function GET(req: NextRequest) {
     let examWhere: any = {};
 
     if (user.role === "TEACHER") {
-      // Guru dapat melihat ujian yang dia buat, mapel yang diampunya, atau mapel tempat dia membuat bank soal
       const assignments = await prisma.teacherAssignment.findMany({
         where: { userId: user.id },
         select: { subjectId: true },
@@ -65,7 +64,14 @@ export async function GET(req: NextRequest) {
               include: {
                 users: {
                   where: { role: "STUDENT" },
-                  select: { id: true, name: true, username: true, nis: true },
+                  select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                    nis: true,
+                    groupId: true,
+                    group: { select: { id: true, name: true, code: true } }
+                  },
                 },
               },
             },
@@ -73,7 +79,16 @@ export async function GET(req: NextRequest) {
         },
         examSessions: {
           include: {
-            user: { select: { id: true, name: true, username: true, nis: true, groupId: true } },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                nis: true,
+                groupId: true,
+                group: { select: { id: true, name: true, code: true } }
+              }
+            },
           },
         },
       },
@@ -85,26 +100,32 @@ export async function GET(req: NextRequest) {
 
     for (const exam of exams) {
       // Kumpulkan semua siswa dari kelas ujian
-      const studentsInGroups: Map<string, { student: any; groupName: string }> = new Map();
+      const studentsInGroups: Map<string, { student: any; groupName: string; groupCode: string }> = new Map();
       for (const eg of exam.examGroups) {
         if (groupId && eg.groupId !== groupId) continue;
         for (const s of eg.group.users) {
-          studentsInGroups.set(s.id, { student: s, groupName: eg.group.name });
+          studentsInGroups.set(s.id, {
+            student: s,
+            groupName: eg.group.name,
+            groupCode: eg.group.code
+          });
         }
       }
 
       const sessionByUserId = new Map(exam.examSessions.map((s) => [s.userId, s]));
 
       // Siswa dari kelas
-      for (const [userId, { student, groupName }] of studentsInGroups) {
+      for (const [userId, { student, groupName, groupCode }] of studentsInGroups) {
         const session = sessionByUserId.get(userId);
-        gradeRows.push(buildGradeRow(exam, student, groupName, session, false));
+        gradeRows.push(buildGradeRow(exam, student, groupName, groupCode, session, false));
       }
 
       // Siswa yang punya sesi tapi tidak ada di daftar kelas
       for (const session of exam.examSessions) {
         if (!studentsInGroups.has(session.userId)) {
-          gradeRows.push(buildGradeRow(exam, session.user, session.user.groupId || "-", session, false));
+          const gName = session.user.group?.name || "-";
+          const gCode = session.user.group?.code || "-";
+          gradeRows.push(buildGradeRow(exam, session.user, gName, gCode, session, false));
         }
       }
 
@@ -113,7 +134,18 @@ export async function GET(req: NextRequest) {
         where: { parentExamId: exam.id, isSupplementary: true },
         include: {
           examSessions: {
-            include: { user: { select: { id: true, name: true, username: true, nis: true, groupId: true } } },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  username: true,
+                  nis: true,
+                  groupId: true,
+                  group: { select: { id: true, name: true, code: true } }
+                }
+              }
+            },
           },
           examGroups: { include: { group: true } },
         },
@@ -121,20 +153,24 @@ export async function GET(req: NextRequest) {
 
       for (const suppExam of supplementaryExams) {
         for (const session of suppExam.examSessions) {
-          const groupName = suppExam.examGroups.find((eg) => eg.groupId === session.user.groupId)?.group.name || "-";
-          gradeRows.push(buildGradeRow(exam, session.user, groupName, session, true));
+          const matchedGroup = suppExam.examGroups.find((eg) => eg.groupId === session.user.groupId)?.group;
+          const gName = matchedGroup?.name || session.user.group?.name || "-";
+          const gCode = matchedGroup?.code || session.user.group?.code || "-";
+          gradeRows.push(buildGradeRow(exam, session.user, gName, gCode, session, true));
         }
       }
     }
 
     if (format === "csv") {
-      const csvHeader = "No,NIS,Nama Siswa,Kelas,Mata Pelajaran,Guru,Judul Ujian,Tanggal Ujian,Status,Nilai,Keterangan\n";
+      const csvHeader = "No,NIS,Nama Siswa,Jurusan,Kelas,Jalur,Mata Pelajaran,Guru,Judul Ujian,Tanggal Ujian,Status,Nilai,Keterangan\n";
       const csvRows = gradeRows.map((r, i) =>
         [
           i + 1,
           r.nis || "-",
           `"${r.studentName}"`,
+          `"${r.jurusan}"`,
           `"${r.groupName}"`,
+          `"${r.jalur}"`,
           `"${r.subjectName}"`,
           `"${r.teacherName}"`,
           `"${r.examTitle}"`,
@@ -159,7 +195,19 @@ export async function GET(req: NextRequest) {
   }
 }
 
-function buildGradeRow(exam: any, student: any, groupName: string, session: any | null, isSupplementary: boolean) {
+function extractJurusan(groupCode: string, groupName: string): string {
+  const combined = `${groupCode} ${groupName}`.toUpperCase();
+  if (combined.includes("TKRO") || combined.includes("KENDARAAN RINGAN")) return "TKRO";
+  if (combined.includes("TP") || combined.includes("PEMESINAN")) return "TP";
+  if (combined.includes("TBSM") || combined.includes("SEPEDA MOTOR")) return "TBSM";
+  if (combined.includes("RPL") || combined.includes("PERANGKAT LUNAK")) return "RPL";
+  if (combined.includes("TKJ") || combined.includes("JARINGAN")) return "TKJ";
+  if (combined.includes("TITL") || combined.includes("LISTRIK")) return "TITL";
+  if (combined.includes("ELEKTRO")) return "ELEKTRONIKA";
+  return "UMUM";
+}
+
+function buildGradeRow(exam: any, student: any, groupName: string, groupCode: string, session: any | null, isSupplementary: boolean) {
   let attendanceStatus = "TIDAK_HADIR";
   let score: number | null = null;
   let note = "-";
@@ -184,6 +232,12 @@ function buildGradeRow(exam: any, student: any, groupName: string, session: any 
     note = "Tidak hadir, belum mengerjakan";
   }
 
+  const jurusan = extractJurusan(groupCode, groupName);
+  const isPkl = (groupCode + " " + groupName).toUpperCase().includes("PKL") || Boolean(student.group?.isPkl);
+  const isSusulan = isSupplementary || Boolean(student.bypassExambro && !isPkl);
+  const jalur = isPkl ? "PKL (Smartphone HP)" : isSusulan ? "Susulan (Smartphone HP)" : "Reguler (PC Lab)";
+  const track = isPkl ? "PKL" : isSusulan ? "SUSULAN" : "REGULER";
+
   return {
     examId: exam.id,
     examTitle: exam.title,
@@ -196,6 +250,12 @@ function buildGradeRow(exam: any, student: any, groupName: string, session: any 
     username: student.username,
     nis: student.nis || "-",
     groupName,
+    groupCode,
+    jurusan,
+    isPkl,
+    isSusulan,
+    track,
+    jalur,
     session: session ? {
       id: session.id,
       status: session.status,

@@ -1,69 +1,302 @@
-@import "katex/dist/katex.min.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: #f8fafc;
-    --foreground: #0f172a;
-    color-scheme: light;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
-  html.dark {
-    --background: #020617;
-    --foreground: #f8fafc;
-    color-scheme: dark;
+  html, html.dark, body, .dark {
+    background-color: #f8fafc !important;
+    background-image: none !important;
+    min-height: 100vh;
+    color: #0f172a;
+    font-family: var(--font-sans);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(0.98); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+/* Custom Scrollbar - Soft Neutral */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ============================================================
+   EYE-CARE ERGONOMIC CARDS & SHADOWS
+   ============================================================ */
+
+/* Clean Matte Card - Replaces screaming cyan glass */
+.glass, .dark .glass {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 1rem;
+  color: #0f172a !important;
+}
+
+/* Brand Gradient - Calm Navy/Indigo */
+.gradient-brand {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+}
+
+/* Soft Paper Subtle Gradient */
+.gradient-soft-blue {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Soft Shadows */
+.shadow-glow {
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15) !important;
+}
+
+.shadow-soft {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.shadow-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* KaTeX */
+.katex-display {
+  margin: 0.75rem 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}
+
+/* ============================================================
+   COMPONENT CLASSES - CLEAN, ERGONOMIC & HIGH CONTRAST
+   ============================================================ */
+@layer components {
+
+  /* --- Layout --- */
+  .page-header {
+    @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4;
+  }
+  .page-title {
+    color: #0f172a !important;
+    @apply text-2xl font-black tracking-tight;
+  }
+  .page-subtitle {
+    color: #475569 !important;
+    @apply text-xs mt-0.5 font-medium;
+  }
+  .header-actions {
+    @apply flex items-center gap-2 flex-wrap;
+  }
+
+  /* --- Buttons --- */
+  .btn-primary {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: 1px solid #1d4ed8 !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25) !important;
+    @apply inline-flex items-center gap-2 px-4 py-2.5 text-xs rounded-xl transition cursor-pointer;
+  }
+  .btn-primary:hover {
+    background: #1d4ed8 !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35) !important;
+  }
+
+  .btn-default, .btn-secondary {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    @apply inline-flex items-center gap-2 px-4 py-2.5 text-xs rounded-xl transition cursor-pointer;
+  }
+  .btn-default:hover, .btn-secondary:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+  }
+
+  .btn-success {
+    background: #059669 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: 1px solid #047857 !important;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25) !important;
+    @apply inline-flex items-center gap-2 px-4 py-2.5 text-xs rounded-xl transition cursor-pointer;
+  }
+  .btn-success:hover {
+    background: #047857 !important;
+  }
+
+  .btn-warning {
+    background: #d97706 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: 1px solid #b45309 !important;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25) !important;
+    @apply inline-flex items-center gap-2 px-4 py-2.5 text-xs rounded-xl transition cursor-pointer;
+  }
+  .btn-warning:hover {
+    background: #b45309 !important;
+  }
+
+  .btn-danger {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: 1px solid #b91c1c !important;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25) !important;
+    @apply inline-flex items-center gap-2 px-4 py-2.5 text-xs rounded-xl transition cursor-pointer;
+  }
+  .btn-danger:hover {
+    background: #b91c1c !important;
+  }
+
+  .btn-icon {
+    background: #ffffff !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    @apply p-2.5 rounded-xl transition cursor-pointer;
+  }
+  .btn-icon:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+  }
+
+  /* --- Forms --- */
+  .form-input {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    font-weight: 500 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    @apply w-full px-3.5 py-2.5 text-xs rounded-xl transition;
+  }
+  .form-input:focus {
+    outline: none !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+  }
+  .form-input::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+  }
+  .form-label {
+    color: #1e293b !important;
+    @apply text-xs font-bold mb-1.5 block;
+  }
+
+  /* --- Tables --- */
+  .table-th {
+    background: #f8fafc !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    @apply py-3.5 px-4 text-xs text-left;
+  }
+  .table-td {
+    color: #1e293b !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    @apply py-3 px-4 text-xs;
+  }
+
+  /* --- Badges --- */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border;
+  }
+  .badge-success {
+    background: #ecfdf5 !important;
+    color: #065f46 !important;
+    border: 1px solid #a7f3d0 !important;
+  }
+  .badge-info {
+    background: #eff6ff !important;
+    color: #1e40af !important;
+    border: 1px solid #bfdbfe !important;
+  }
+  .badge-neutral {
+    background: #f8fafc !important;
+    color: #334155 !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  .badge-warning {
+    background: #fffbeb !important;
+    color: #92400e !important;
+    border: 1px solid #fde68a !important;
+  }
+  .badge-danger {
+    background: #fef2f2 !important;
+    color: #991b1b !important;
+    border: 1px solid #fecaca !important;
+  }
+
+  /* --- Modal --- */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs;
+  }
+  .modal-container {
+    @apply glass max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl;
+  }
+  .modal-header {
+    @apply flex items-center justify-between mb-4;
+  }
+  .modal-title {
+    color: #0f172a !important;
+    @apply text-base font-bold;
+  }
+
+  .stat-card {
+    @apply glass p-5 relative overflow-hidden;
+  }
+}
+
+/* ============================================================
+   ANTI-CHEAT SECURITY WORKSPACE & PRINT RESTRICTIONS
+   ============================================================ */
+.exam-workspace {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+.exam-workspace input,
+.exam-workspace textarea,
+.exam-workspace select {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
   }
 
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
+    background: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-}
 
-/* Arabic Typography Enhancements */
-.font-arabic, [dir="rtl"], [dir="auto"]:has(*:lang(ar)) {
-  font-family: "Amiri", "Scheherazade New", "Traditional Arabic", "Segoe UI", Tahoma, sans-serif;
-  line-height: 2.2 !important;
-  letter-spacing: 0.02em;
-}
-
-/* KaTeX custom styles */
-.katex-display {
-  margin: 0.5em 0 !important;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
-
-/* Smooth transitions */
-* {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  /* Anti-cheat: ONLY block printing during active student exam sessions */
+  .exam-workspace,
+  .exam-workspace * {
+    display: none !important;
+    visibility: hidden !important;
+  }
 }

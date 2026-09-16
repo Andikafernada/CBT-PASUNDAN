@@ -1,6 +1,5 @@
 import crypto from "crypto";
-
-const JWT_SECRET = process.env.JWT_SECRET || "super-secure-production-cbt-key-2026-proxmox";
+import { JWT_SECRET } from "./secret";
 
 /**
  * Generate a 6-character uppercase alphanumeric dynamic token that refreshes every 15 minutes.
@@ -38,10 +37,10 @@ export function verifyExamToken(
   if (exam.isTokenDynamic) {
     const currentDynamic = getDynamicToken(exam.id, 0);
     const previousDynamic = getDynamicToken(exam.id, -1); // 15-minute grace period
-    const staticFallback = (exam.token || "ZYACBT").toUpperCase();
+    const staticFallback = (exam.token || "HEBAT").toUpperCase();
     return trimmed === currentDynamic || trimmed === previousDynamic || trimmed === staticFallback;
   }
 
-  const expected = (exam.token || "ZYACBT").toUpperCase();
+  const expected = (exam.token || "HEBAT").toUpperCase();
   return trimmed === expected;
 }

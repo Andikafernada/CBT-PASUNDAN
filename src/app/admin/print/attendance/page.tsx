@@ -9,6 +9,8 @@ export default function PrintAttendancePage() {
   const [groups, setGroups] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("ALL");
+  const [selectedRoom, setSelectedRoom] = useState<string>("ALL");
+  const [selectedSession, setSelectedSession] = useState<string>("ALL");
   const [selectedExam, setSelectedExam] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +45,10 @@ export default function PrintAttendancePage() {
       setStudents(stuData.students || []);
       setGroups(stuData.groups || []);
       setExams(examData.exams || []);
-      if (examData.exams?.length > 0) {
+      const urlExamId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("examId") : null;
+      if (urlExamId && examData.exams?.some((e: any) => e.id === urlExamId)) {
+        setSelectedExam(urlExamId);
+      } else if (examData.exams?.length > 0) {
         setSelectedExam(examData.exams[0].id);
       }
     } catch (e) {
@@ -54,9 +59,16 @@ export default function PrintAttendancePage() {
   };
 
   const currentExam = exams.find((e) => e.id === selectedExam) || exams[0];
+
+  // Extract available rooms & sessions dynamically from student data
+  const availableRooms = Array.from(new Set(students.map((s) => s.room || s.ruang))).filter(Boolean).sort();
+  const availableSessions = Array.from(new Set(students.map((s) => s.session || s.sesi))).filter(Boolean).sort();
+
   const filteredStudents = students.filter((s) => {
-    if (selectedGroup === "ALL") return true;
-    return s.groupId === selectedGroup;
+    if (selectedGroup !== "ALL" && s.groupId !== selectedGroup) return false;
+    if (selectedRoom !== "ALL" && (s.room || s.ruang) !== selectedRoom) return false;
+    if (selectedSession !== "ALL" && String(s.session || s.sesi) !== String(selectedSession)) return false;
+    return true;
   });
 
   const handlePrint = () => {
@@ -66,11 +78,11 @@ export default function PrintAttendancePage() {
   return (
     <div className="space-y-6">
       {/* Control Header - Hidden when printing */}
-      <div className="print:hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="print:hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-sky-300">
         <div className="flex items-center gap-3">
           <Link
             href="/admin/dashboard"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition"
+            className="p-2 rounded-xl bg-sky-100 border border-sky-300 text-slate-400 hover:text-white transition"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
@@ -88,7 +100,7 @@ export default function PrintAttendancePage() {
             className={`p-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
               showConfig
                 ? "bg-purple-600 text-white border-purple-500"
-                : "bg-slate-900 text-slate-300 border-slate-800 hover:text-white"
+                : "bg-sky-100 text-slate-300 border-sky-300 hover:text-white"
             }`}
           >
             <Settings2 className="w-4 h-4" />
@@ -98,7 +110,7 @@ export default function PrintAttendancePage() {
           <select
             value={selectedExam}
             onChange={(e) => setSelectedExam(e.target.value)}
-            className="px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+            className="px-3.5 py-2 bg-sky-100 border border-sky-300 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
           >
             {exams.map((ex) => (
               <option key={ex.id} value={ex.id}>
@@ -110,7 +122,7 @@ export default function PrintAttendancePage() {
           <select
             value={selectedGroup}
             onChange={(e) => setSelectedGroup(e.target.value)}
-            className="px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+            className="px-3.5 py-2 bg-sky-100 border border-sky-300 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
           >
             <option value="ALL">Semua Kelas ({students.length} Siswa)</option>
             {groups.map((g) => (
@@ -132,14 +144,14 @@ export default function PrintAttendancePage() {
 
       {/* Config Panel (Hidden on Print) */}
       {showConfig && (
-        <div className="print:hidden bg-slate-900 border border-slate-800 rounded-2xl p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs animate-in fade-in">
+        <div className="print:hidden bg-sky-100 border border-sky-300 rounded-2xl p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs animate-in fade-in">
           <div>
             <label className="block text-slate-400 font-semibold mb-1">Nama Sekolah</label>
             <input
               type="text"
               value={schoolName}
               onChange={(e) => setSchoolName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white focus:outline-none focus:border-blue-500"
             />
           </div>
           <div>
@@ -148,7 +160,7 @@ export default function PrintAttendancePage() {
               type="text"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white focus:outline-none focus:border-blue-500"
             />
           </div>
           <div>
@@ -157,7 +169,7 @@ export default function PrintAttendancePage() {
               type="text"
               value={sessionName}
               onChange={(e) => setSessionName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white focus:outline-none focus:border-blue-500"
             />
           </div>
           <div>
@@ -166,7 +178,7 @@ export default function PrintAttendancePage() {
               type="text"
               value={proctorName}
               onChange={(e) => setProctorName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white focus:outline-none focus:border-blue-500"
             />
           </div>
           <div>
@@ -175,7 +187,7 @@ export default function PrintAttendancePage() {
               type="text"
               value={invigilator1}
               onChange={(e) => setInvigilator1(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white focus:outline-none focus:border-blue-500"
             />
           </div>
           <div>
@@ -184,7 +196,7 @@ export default function PrintAttendancePage() {
               type="text"
               value={invigilator2}
               onChange={(e) => setInvigilator2(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-sky-50 border border-sky-300 rounded-xl text-white focus:outline-none focus:border-blue-500"
             />
           </div>
         </div>
@@ -200,14 +212,14 @@ export default function PrintAttendancePage() {
           <p className="text-xs text-slate-600 font-medium">{schoolAddress}</p>
           <div className="border-t border-slate-900 mt-2 pt-2">
             <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
-              DAFTAR HADIR PESERTA ASESMEN SUMATIF BERBASIS KOMPUTER (CBT)
+              DAFTAR HADIR PESERTA CBT HEBAT - ASESMEN SUMATIF BERBASIS KOMPUTER
             </h3>
             <p className="text-xs font-semibold text-slate-700">TAHUN AJARAN 2026/2027</p>
           </div>
         </div>
 
         {/* Exam Metadata Grid */}
-        <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-xs mb-4 border border-slate-300 p-3 rounded-lg bg-slate-50 print:bg-white print:border-slate-800">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-xs mb-4 border border-slate-300 p-3 rounded-lg bg-slate-50 print:bg-white print:border-sky-300">
           <div className="flex">
             <span className="w-28 text-slate-600 font-semibold">Mata Pelajaran</span>
             <span className="w-3 text-slate-400">:</span>

@@ -24,6 +24,23 @@ export async function POST(
       return NextResponse.json({ error: "Ujian tidak ditemukan" }, { status: 404 });
     }
 
+    // 🔒 Kiosk Exam Browser Validation on Finish (Priority 3)
+    const isBypassed = Boolean((user as any).bypassExambro || user.group?.isPkl || (user.group as any)?.bypassExambro);
+    if (exam.requireKioskBrowser && !isBypassed) {
+      const userAgent = req.headers.get("user-agent") || "";
+      const sebHeader = req.headers.get("x-safeexambrowser-requesthash");
+      const pattern = new RegExp(exam.kioskUserAgentPattern || "Exambro|SafeExamBrowser", "i");
+      if (!pattern.test(userAgent) && !sebHeader) {
+        return NextResponse.json(
+          {
+            error: "Akses ditolak: Aplikasi wajib dijalankan di Exambro / Safe Exam Browser!",
+            isKioskRequired: true,
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     const session = await prisma.examSession.findUnique({
       where: { examId_userId: { examId, userId: user.id } },
     });
@@ -36,11 +53,48 @@ export async function POST(
       return NextResponse.json({ error: "Ujian sudah selesai dikerjakan" }, { status: 400 });
     }
 
-    // Early Submission Lock: Cannot submit if remaining time > 10 minutes (600s) and duration > 10 mins
-    const examDurationMinutes = exam.durationMinutes || 60;
-    const currentRemainingSeconds = session.remainingSeconds ?? 3600;
+    // 🔒 ATOMIC CONCURRENCY LOCK (Anti-Race Condition):
+    // Atomically transition status from IN_PROGRESS -> SUBMITTING
+    // Eliminates race conditions and duplicate AI grading calls if student double-submits
+    const lockResult = await prisma.examSession.updateMany({
+      where: {
+        id: session.id,
+        status: "IN_PROGRESS",
+      },
+      data: {
+        status: "SUBMITTING",
+      },
+    });
 
+    if (lockResult.count === 0) {
+      return NextResponse.json(
+        { error: "Sesi ujian Anda sedang diproses atau telah selesai dikerjakan" },
+        { status: 409 }
+      );
+    }
+
+    // 🔒 DUAL-CAP AUTHORITATIVE REMAINING TIME:
+    // Takes the smaller of session duration and global exam.endTime
+    const now = new Date();
+    const examDurationMinutes = exam.durationMinutes || 60;
+    const elapsedSeconds = Math.floor((now.getTime() - new Date(session.startedAt).getTime()) / 1000);
+    const durationRemaining = Math.max(0, examDurationMinutes * 60 - elapsedSeconds);
+
+    let scheduleRemaining = Infinity;
+    if (exam.endTime) {
+      scheduleRemaining = Math.max(0, Math.floor((new Date(exam.endTime).getTime() - now.getTime()) / 1000));
+    }
+
+    const currentRemainingSeconds = Math.min(durationRemaining, scheduleRemaining);
+
+    // Early Submission Lock: Cannot submit if remaining time > 10 minutes (600s) and duration > 10 mins
     if (examDurationMinutes > 10 && currentRemainingSeconds > 600) {
+      // Revert status back to IN_PROGRESS so student can continue
+      await prisma.examSession.update({
+        where: { id: session.id },
+        data: { status: "IN_PROGRESS" },
+      });
+
       const secondsUntilUnlock = currentRemainingSeconds - 600;
       const minutesUntilUnlock = Math.ceil(secondsUntilUnlock / 60);
 
@@ -56,14 +110,15 @@ export async function POST(
       );
     }
 
-    const result: any = await calculateAndFinishSession(session.id, "SELF");
+    const finishReason = currentRemainingSeconds <= 0 ? "TIMEOUT" : "SELF";
+    const result: any = await calculateAndFinishSession(session.id, finishReason);
 
     return NextResponse.json({
       success: true,
       message: "Ujian berhasil diselesaikan",
       result: {
         score: result.score,
-        totalQuestions: exam.examQuestions.length,
+        totalQuestions: exam.examQuestions.length > 0 ? exam.examQuestions.length : (result.totalQuestions || 0),
         correctCount: result.correctCount,
         incorrectCount: result.incorrectCount,
         essayCount: result.essayCount,

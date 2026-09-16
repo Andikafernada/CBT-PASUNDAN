@@ -11,7 +11,6 @@ model User {
   id                String        @id @default(cuid())
   username          String        @unique
   password          String
-  plainPassword     String?
   name              String
   role              String        @default("STUDENT") // ADMIN, TEACHER, OPERATOR, STUDENT
   nis               String?
@@ -23,8 +22,11 @@ model User {
   deviceFingerprint String?
   lastLoginAt       DateTime?
   isLoginLocked     Boolean       @default(false)
+  bypassExambro     Boolean       @default(false) // Whitelist siswa susulan/sakit/HP
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
+
+  @@index([role, groupId])
   examSessions      ExamSession[]
   teacherAssignments TeacherAssignment[]
   createdExams      Exam[]        @relation("ExamCreatedBy")
@@ -46,6 +48,8 @@ model Group {
   code        String               @unique
   name        String
   description String?
+  isPkl       Boolean              @default(false)
+  bypassExambro Boolean              @default(false) // Whitelist rombel PKL/Luar Lab
   users       User[]
   examGroups  ExamGroup[]
   teacherAssignments TeacherAssignment[]
@@ -113,6 +117,7 @@ model Question {
   audioUrl        String?
   videoUrl        String?
   imageUrl        String?
+  rubric          String?         @db.LongText // Kunci Jawaban / Rubrik Penilaian AI
   difficulty      String          @default("MEDIUM") // EASY, MEDIUM, HARD
   points          Float           @default(1.0)
   isActive        Boolean         @default(true)
@@ -133,6 +138,8 @@ model QuestionOption {
   content    String   @db.LongText
   isCorrect  Boolean  @default(false)
   orderIndex Int      @default(0)
+
+  @@index([questionId])
 }
 
 model MatchingPair {
@@ -142,6 +149,8 @@ model MatchingPair {
   premise    String   @db.LongText // Pernyataan / Item Kiri
   response   String   @db.LongText // Pasangan / Item Kanan
   orderIndex Int      @default(0)
+
+  @@index([questionId])
 }
 
 model Exam {
@@ -167,6 +176,9 @@ model Exam {
   isPublished           Boolean        @default(false)
   requireKioskBrowser   Boolean        @default(false)
   kioskUserAgentPattern String?        @default("Exambro|SafeExamBrowser")
+  // Kategori Ujian: REGULER vs PKL
+  category              String         @default("REGULER")
+  disableAntiCheat      Boolean        @default(false)
   // Ujian Susulan
   isSupplementary       Boolean        @default(false) // Apakah ini ujian susulan?
   parentExamId          String?        // ID ujian utama (jika ini susulan)
@@ -180,11 +192,15 @@ model Exam {
 }
 
 model ExamGroup {
-  id      String @id @default(cuid())
-  examId  String
-  groupId String
-  exam    Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
-  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  id          String    @id @default(cuid())
+  examId      String
+  groupId     String
+  sessionName String?   // "Sesi 1", "Sesi 2", "Sesi 3"
+  room        String?   // "Lab 1", "Lab 2", "Lab 3"
+  startTime   DateTime? // Jam buka akses khusus sesi/rombel ini
+  endTime     DateTime? // Jam tutup akses khusus sesi/rombel ini
+  exam        Exam      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([examId, groupId])
 }
@@ -225,6 +241,8 @@ model ExamSession {
   updatedAt        DateTime       @updatedAt
 
   @@unique([examId, userId])
+  @@index([userId, status])
+  @@index([examId, status])
 }
 
 model ExamAnswer {
@@ -240,10 +258,12 @@ model ExamAnswer {
   isCorrect        Boolean?
   scoreAwarded     Float?      @default(0.0)
   teacherFeedback  String?     @db.LongText
+  isAiGraded       Boolean     @default(false)
   answeredAt       DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
   @@unique([sessionId, questionId])
+  @@index([questionId])
 }
 
 model ViolationLog {
@@ -253,6 +273,8 @@ model ViolationLog {
   violationType String      // TAB_SWITCH, FULLSCREEN_EXIT, MULTIPLE_DEVICE, COPY_PASTE
   details       String?
   timestamp     DateTime    @default(now())
+
+  @@index([sessionId, timestamp])
 }
 
 model SystemSetting {

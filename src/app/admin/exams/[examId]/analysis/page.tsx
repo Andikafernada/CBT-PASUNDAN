@@ -182,7 +182,7 @@ export default function ItemAnalysisPage() {
         <div className="flex items-center gap-3">
           <Link
             href={`/admin/exams`}
-            className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition"
+            className="p-2 rounded-xl bg-white dark:bg-sky-50 border border-slate-200 dark:border-sky-200 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-black transition"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
@@ -194,7 +194,7 @@ export default function ItemAnalysisPage() {
               <span className="text-xs text-slate-500">•</span>
               <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{data?.exam?.code || attendanceData?.exam?.title}</span>
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-black tracking-tight mt-1">
               {data?.exam?.title || attendanceData?.exam?.title}
             </h1>
           </div>
@@ -221,13 +221,13 @@ export default function ItemAnalysisPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 gap-2">
+      <div className="flex border-b border-slate-200 dark:border-sky-200 gap-2">
         <button
           onClick={() => setActiveTab("ATTENDANCE")}
           className={`pb-3 px-4 text-xs font-bold transition border-b-2 flex items-center gap-2 ${
             activeTab === "ATTENDANCE"
               ? "border-blue-500 text-blue-400"
-              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white"
+              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-black"
           }`}
         >
           <Users className="w-4 h-4" />
@@ -238,7 +238,7 @@ export default function ItemAnalysisPage() {
           className={`pb-3 px-4 text-xs font-bold transition border-b-2 flex items-center gap-2 ${
             activeTab === "PSYCHOMETRICS"
               ? "border-blue-500 text-blue-400"
-              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white"
+              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-black"
           }`}
         >
           <BarChart3 className="w-4 h-4" />
@@ -283,24 +283,24 @@ export default function ItemAnalysisPage() {
               <div className="text-2xl font-black text-rose-300">{summary.tidakHadir}</div>
             </div>
 
-            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <div className="p-4 rounded-xl bg-white dark:bg-sky-50 border border-slate-200 dark:border-sky-200">
               <div className="text-slate-500 dark:text-slate-400 flex items-center gap-1 mb-1 text-[11px] font-bold">
                 <Users className="w-3.5 h-3.5" />
                 <span>Total Sasaran</span>
               </div>
-              <div className="text-2xl font-black text-slate-900 dark:text-white">{summary.total}</div>
+              <div className="text-2xl font-black text-slate-900 dark:text-black">{summary.total}</div>
             </div>
           </div>
 
           {/* Table */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-            <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-              <div className="font-bold text-slate-900 dark:text-white text-sm">Daftar Status & Nilai Peserta</div>
+          <div className="glass overflow-hidden">
+            <div className="p-4 border-b border-slate-200 dark:border-sky-200 flex items-center justify-between">
+              <div className="font-bold text-slate-900 dark:text-black text-sm">Daftar Status & Nilai Peserta</div>
               {summary.sedangMengerjakan > 0 && (
                 <button
                   onClick={handleForceFinishAll}
                   disabled={actionLoading === "ALL"}
-                  className="px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-slate-900 dark:text-white rounded-lg text-xs font-bold flex items-center gap-1 transition"
+                  className="px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-slate-900 dark:text-black rounded-lg text-xs font-bold flex items-center gap-1 transition"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   <span>Paksa Selesaikan Semua ({summary.sedangMengerjakan})</span>
@@ -310,7 +310,7 @@ export default function ItemAnalysisPage() {
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-slate-950/50">
+                <thead className="border-b border-slate-200 dark:border-sky-200 text-slate-500 dark:text-slate-400 bg-sky-50">
                   <tr>
                     <th className="py-3 px-3">No</th>
                     <th className="py-3 px-3">NIS</th>
@@ -326,10 +326,10 @@ export default function ItemAnalysisPage() {
                   {studentsList.map((row: any, i: number) => {
                     const isFinished = ["HADIR", "DIPAKSA_SELESAI", "WAKTU_HABIS"].includes(row.attendanceStatus);
                     return (
-                      <tr key={row.student.id} className="hover:bg-slate-800/40">
+                      <tr key={row.student.id} className="hover:bg-sky-100">
                         <td className="py-3 px-3 text-slate-500">{i + 1}</td>
                         <td className="py-3 px-3 text-slate-500 dark:text-slate-400">{row.student.nis || "-"}</td>
-                        <td className="py-3 px-3 font-semibold text-slate-900 dark:text-white">{row.student.name}</td>
+                        <td className="py-3 px-3 font-semibold text-slate-900 dark:text-black">{row.student.name}</td>
                         <td className="py-3 px-3 text-slate-700 dark:text-slate-300">{row.student.groupName}</td>
                         <td className="py-3 px-3 text-center">
                           {row.attendanceStatus === "HADIR" ? (
@@ -394,18 +394,18 @@ export default function ItemAnalysisPage() {
         <div className="space-y-6">
           {/* Overview Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center gap-4">
+            <div className="glass p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-blue-600/10 text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
                 <Users className="w-6 h-6" />
               </div>
               <div>
                 <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Peserta Ujian</div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white mt-0.5">{data.totalParticipants} Siswa</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-black mt-0.5">{data.totalParticipants} Siswa</div>
                 <div className="text-[10px] text-slate-500">Kelompok 27%: {data.upperGroupSize} Siswa</div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center gap-4">
+            <div className="glass p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-purple-600/10 text-purple-400 border border-purple-500/20 flex items-center justify-center shrink-0">
                 <Sparkles className="w-6 h-6" />
               </div>
@@ -416,18 +416,18 @@ export default function ItemAnalysisPage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center gap-4">
+            <div className="glass p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
                 <Award className="w-6 h-6" />
               </div>
               <div>
                 <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Rata-Rata Nilai</div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white mt-0.5">{data.averageScore} / 100</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-black mt-0.5">{data.averageScore} / 100</div>
                 <div className="text-[10px] text-slate-500">Tertinggi: {data.highestScore} • Terendah: {data.lowestScore}</div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center gap-4">
+            <div className="glass p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-amber-600/10 text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
                 <BarChart3 className="w-6 h-6" />
               </div>
@@ -446,9 +446,9 @@ export default function ItemAnalysisPage() {
           </div>
 
           {/* Item Analysis Detailed Table */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-            <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-              <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+          <div className="glass overflow-hidden">
+            <div className="p-4 border-b border-slate-200 dark:border-sky-200 flex items-center justify-between">
+              <div className="font-bold text-slate-900 dark:text-black text-sm flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-blue-400" />
                 <span>Tabel Analisis Psikometri per Butir Soal</span>
               </div>
@@ -462,10 +462,10 @@ export default function ItemAnalysisPage() {
             ) : (
               <div className="divide-y divide-slate-800/60">
                 {data.items.map((item: any) => (
-                  <div key={item.questionId} className="p-5 hover:bg-slate-800/30 transition space-y-4">
+                  <div key={item.questionId} className="p-5 hover:bg-sky-100 transition space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="w-8 h-8 rounded-xl bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-xs text-slate-900 dark:text-white flex items-center justify-center shrink-0">
+                        <span className="w-8 h-8 rounded-xl bg-sky-100 border border-slate-200 dark:border-sky-200 font-bold text-xs text-slate-900 dark:text-black flex items-center justify-center shrink-0">
                           {item.number}
                         </span>
                         <div>
@@ -477,11 +477,11 @@ export default function ItemAnalysisPage() {
                       </div>
 
                       <div className="flex items-center gap-2 flex-wrap">
-                        <div className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[11px] flex items-center gap-1.5">
+                        <div className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 text-[11px] flex items-center gap-1.5">
                           <span className="text-slate-500 font-mono">P = {item.difficultyIndex}</span>
                           <span className="font-bold text-blue-400">({item.difficultyCategory})</span>
                         </div>
-                        <div className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[11px] flex items-center gap-1.5">
+                        <div className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 text-[11px] flex items-center gap-1.5">
                           <span className="text-slate-500 font-mono">D = {item.discriminationIndex}</span>
                           <span className="font-bold text-emerald-400">({item.discriminationCategory})</span>
                         </div>
@@ -499,7 +499,7 @@ export default function ItemAnalysisPage() {
                       </div>
                     </div>
 
-                    <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 text-xs text-slate-700 dark:text-slate-300 line-clamp-2">
+                    <div className="bg-sky-50 border border-sky-300/80 rounded-xl p-3 text-xs text-slate-700 dark:text-slate-300 line-clamp-2">
                       <MathContent content={item.content} />
                     </div>
                   </div>
@@ -512,14 +512,14 @@ export default function ItemAnalysisPage() {
 
       {/* Modal Buat Ujian Susulan */}
       {showSuppModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-sky-950/25 backdrop-blur-xs backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="glass max-w-lg w-full p-6 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
                 <Plus className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Buat Sesi Ujian Susulan</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-black">Buat Sesi Ujian Susulan</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Dikhususkan bagi {summary.tidakHadir} siswa yang tidak hadir pada jadwal utama
                 </p>
@@ -534,7 +534,7 @@ export default function ItemAnalysisPage() {
                   required
                   value={suppForm.title}
                   onChange={(e) => setSuppForm({ ...suppForm, title: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black"
                 />
               </div>
 
@@ -546,7 +546,7 @@ export default function ItemAnalysisPage() {
                     required
                     value={suppForm.code}
                     onChange={(e) => setSuppForm({ ...suppForm, code: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white uppercase font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black uppercase font-mono"
                   />
                 </div>
 
@@ -557,7 +557,7 @@ export default function ItemAnalysisPage() {
                     required
                     value={suppForm.durationMinutes}
                     onChange={(e) => setSuppForm({ ...suppForm, durationMinutes: parseInt(e.target.value) || 60 })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black"
                   />
                 </div>
               </div>
@@ -569,11 +569,11 @@ export default function ItemAnalysisPage() {
                   required
                   value={suppForm.token}
                   onChange={(e) => setSuppForm({ ...suppForm, token: e.target.value.toUpperCase() })}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-mono uppercase"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-sky-50 border border-slate-200 dark:border-sky-200 rounded-xl text-slate-900 dark:text-black font-mono uppercase"
                 />
               </div>
 
-              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
+              <div className="p-3 bg-slate-50 dark:bg-sky-50 rounded-xl border border-slate-200 dark:border-sky-200 space-y-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -587,11 +587,11 @@ export default function ItemAnalysisPage() {
                 </label>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-sky-200">
                 <button
                   type="button"
                   onClick={() => setShowSuppModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-white rounded-xl"
+                  className="px-4 py-2 bg-sky-100 hover:bg-slate-700 text-slate-900 dark:text-black rounded-xl"
                 >
                   Batal
                 </button>

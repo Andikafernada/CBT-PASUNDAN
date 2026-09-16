@@ -16,7 +16,6 @@ conn
             where: { username: \\"root\\" },
             update: {
               password: hashedPassword,
-              plainPassword: \\"P45und4n2\\",
               role: \\"ADMIN\\",
               name: \\"Super Administrator (Root)\\",
               isActive: true,
@@ -25,7 +24,6 @@ conn
             create: {
               username: \\"root\\",
               password: hashedPassword,
-              plainPassword: \\"P45und4n2\\",
               role: \\"ADMIN\\",
               name: \\"Super Administrator (Root)\\",
               isActive: true,

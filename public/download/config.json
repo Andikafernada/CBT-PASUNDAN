@@ -1,0 +1,9 @@
+{
+  "server_url": "http://172.16.0.210",
+  "exit_password": "admin",
+  "kiosk_mode": true,
+  "auto_reconnect_interval_sec": 3,
+  "heartbeat_interval_sec": 5,
+  "window_title": "CBT EXAMBROWSER - LAB CLIENT",
+  "allow_dev_tools": false
+}

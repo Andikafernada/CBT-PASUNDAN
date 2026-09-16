@@ -40,6 +40,18 @@ export function MathContent({ content, className = "" }: MathContentProps) {
       }
     });
 
+    // 4. Auto-detect unwrapped LaTeX commands (tanpa tanda $ $)
+    // Memudahkan guru matematika, fisika, elektro agar tidak wajib mengetik tanda $ $
+    const latexPattern = /\\(?:frac\s*\{[^{}]*\}\s*\{[^{}]*\}|sqrt(?:\[[^\]]*\])?\s*\{[^{}]*\}|(?:alpha|beta|gamma|delta|epsilon|varepsilon|zeta|eta|theta|lambda|mu|nu|xi|pi|rho|sigma|tau|phi|chi|psi|omega|Delta|Theta|Lambda|Xi|Pi|Sigma|Phi|Psi|Omega|times|div|pm|mp|cdot|le|leq|ge|geq|ne|neq|approx|equiv|degree|infty|angle|parallel|perp|sum|int|iint|iiint|oint|prod|lim)(?:\s*[_^](?:\{[^{}]*\}|[0-9a-zA-Z]))*)/g;
+
+    processed = processed.replace(latexPattern, (match) => {
+      try {
+        return katex.renderToString(match, { displayMode: false, throwOnError: false });
+      } catch {
+        return match;
+      }
+    });
+
     return processed;
   };
 
@@ -75,7 +87,7 @@ export function MathContent({ content, className = "" }: MathContentProps) {
       <div
         ref={containerRef}
         dangerouslySetInnerHTML={{ __html: formatContent(content) }}
-        className={`leading-relaxed [&_img]:max-h-80 [&_img]:max-w-full [&_img]:rounded-xl [&_img]:border [&_img]:border-slate-700 [&_img]:my-3 [&_img]:block [&_img]:object-contain [&_img]:shadow-lg [&_img]:bg-slate-950/80 [&_img]:transition-all [&_img]:hover:border-blue-500/80 [&_img]:hover:brightness-105 ${className}`}
+        className={`leading-relaxed [&_img]:max-h-80 [&_img]:max-w-full [&_img]:rounded-xl [&_img]:border [&_img]:border-slate-200 [&_img]:my-3 [&_img]:block [&_img]:object-contain [&_img]:shadow-md [&_img]:bg-white [&_img]:p-1 [&_img]:transition-all [&_img]:hover:border-blue-400 [&_img]:hover:shadow-lg ${className}`}
       />
 
       {lightboxSrc && (
