@@ -87,8 +87,32 @@ export async function POST(
 
     const currentRemainingSeconds = Math.min(durationRemaining, scheduleRemaining);
 
-    // Early Submission Lock: Cannot submit if remaining time > 10 minutes (600s) and duration > 10 mins
-    if (examDurationMinutes > 10 && currentRemainingSeconds > 600) {
+    // 🎯 SMART EARLY SUBMISSION:
+    // Izinkan siswa mengumpulkan jika:
+    // 1. Seluruh butir soal telah dijawab tuntas (isAllAnswered), ATAU
+    // 2. Batas waktu minimal (minTimeMinutes) telah tercapai, ATAU
+    // 3. Sisa waktu pengerjaan <= 10 menit (600s)
+    const totalQCount = exam.examQuestions.length > 0
+      ? exam.examQuestions.length
+      : await prisma.question.count({ where: { subjectId: exam.subjectId, isActive: true } });
+
+    const answeredCount = await prisma.examAnswer.count({
+      where: {
+        sessionId: session.id,
+        OR: [
+          { selectedOptionIds: { not: null } },
+          { textAnswer: { not: null } },
+          { matchingAnswer: { not: null } }
+        ]
+      }
+    });
+
+    const isAllAnswered = totalQCount > 0 && answeredCount >= totalQCount;
+    const minTimeSeconds = (exam.minTimeMinutes || 0) * 60;
+    const passedMinTime = minTimeSeconds > 0 ? elapsedSeconds >= minTimeSeconds : true;
+
+    // HANYA kunci jika BELUM semua dijawab DAN masih di atas 10 menit DAN belum lewat minTime
+    if (!isAllAnswered && examDurationMinutes > 10 && currentRemainingSeconds > 600 && !passedMinTime) {
       // Revert status back to IN_PROGRESS so student can continue
       await prisma.examSession.update({
         where: { id: session.id },
@@ -100,7 +124,7 @@ export async function POST(
 
       return NextResponse.json(
         {
-          error: `Pengumpulan ujian terkunci. Tombol selesaikan ujian baru akan aktif saat sisa waktu pengerjaan 10 menit terakhir (sekitar ${minutesUntilUnlock} menit lagi). Silakan periksa kembali seluruh jawaban Anda.`,
+          error: `Pengumpulan ujian terkunci. Anda baru menjawab ${answeredCount}/${totalQCount} butir soal. Tombol selesaikan ujian akan aktif saat seluruh soal terjawab atau pada sisa waktu 10 menit terakhir (sekitar ${minutesUntilUnlock} menit lagi).`,
           isLockedEarly: true,
           remainingSeconds: currentRemainingSeconds,
           secondsUntilUnlock,

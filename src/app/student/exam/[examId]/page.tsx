@@ -682,6 +682,15 @@ export default function ExamRoomPage({
         return;
       }
 
+      // 🛡️ PC Lab / Desktop Exambro Shield:
+      // Di browser / WebView2 Exambro, event blur terpanggil setiap kali fokus elemen berpindah
+      // (misal saat klik opsi jawaban, klik nomor palet, atau klik teks soal).
+      // Selama document.hidden adalah FALSE, window sebenarnya MASIH TERBUKA dan AKTIF di layar!
+      // Oleh karena itu, abaikan jika dokumen masih terlihat (!document.hidden).
+      if (!document.hidden) {
+        return;
+      }
+
       // Untuk PC Lab (Desktop), pastikan elemen form atau klik tombol tidak terhitung pelanggaran
       const activeEl = typeof document !== "undefined" ? document.activeElement : null;
       if (activeEl && (

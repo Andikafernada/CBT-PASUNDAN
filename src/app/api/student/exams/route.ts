@@ -56,7 +56,14 @@ export async function GET() {
         ...groupFilter,
       },
       include: {
-        subject: true,
+        subject: {
+          include: {
+            questions: {
+              where: { isActive: true },
+              select: { id: true },
+            },
+          },
+        },
         examQuestions: {
           select: { id: true },
         },
@@ -111,9 +118,13 @@ export async function GET() {
 
     const formatted = visibleExams.map((exam) => {
       const session = exam.examSessions[0] || null;
-      const studentGroupInfo = (exam as any).examGroups?.[0] || null;
+      const studentGroupInfo = (exam as any).examGroups?.find((eg: any) => eg.groupId === user.groupId) || (exam as any).examGroups?.[0] || null;
       const effectiveStartTime = studentGroupInfo?.startTime || exam.startTime;
       const effectiveEndTime = studentGroupInfo?.endTime || exam.endTime;
+
+      const totalQuestions = exam.examQuestions.length > 0
+        ? exam.examQuestions.length
+        : (exam.subject?.questions?.length || 0);
 
       return {
         id: exam.id,
@@ -122,7 +133,7 @@ export async function GET() {
         description: exam.description,
         subject: exam.subject.name,
         durationMinutes: exam.durationMinutes,
-        totalQuestions: exam.examQuestions.length,
+        totalQuestions,
         startTime: exam.startTime,
         endTime: exam.endTime,
         sessionName: studentGroupInfo?.sessionName || null,

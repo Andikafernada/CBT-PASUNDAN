@@ -1,5 +1,23 @@
 "use client";
 
+// 🕒 Robust Local Timezone Helpers (Avoid UTC shifts from .toISOString())
+function toLocalDatetimeString(dateInput: Date | string | null | undefined): string {
+  if (!dateInput) return "";
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return "";
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function toLocalDateString(dateInput: Date | string | null | undefined): string {
+  if (!dateInput) return "";
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return "";
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+
 
 
 
@@ -4571,11 +4589,11 @@ Lanjutkan?`
 
 
 
-                          startTime: exam.startTime ? new Date(exam.startTime).toISOString().slice(0, 16) : "",
+                          startTime: toLocalDatetimeString(exam.startTime),
 
 
 
-                          endTime: exam.endTime ? new Date(exam.endTime).toISOString().slice(0, 16) : "",
+                          endTime: toLocalDatetimeString(exam.endTime),
 
 
 
@@ -4626,8 +4644,8 @@ Lanjutkan?`
                               map[eg.groupId] = {
                                 sessionName: eg.sessionName || "",
                                 room: eg.room || "",
-                                startTime: eg.startTime ? new Date(eg.startTime).toISOString().slice(0, 16) : "",
-                                endTime: eg.endTime ? new Date(eg.endTime).toISOString().slice(0, 16) : "",
+                                startTime: toLocalDatetimeString(eg.startTime),
+                                endTime: toLocalDatetimeString(eg.endTime),
                               };
                             });
                             return map;
