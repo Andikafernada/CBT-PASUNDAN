@@ -33,20 +33,22 @@ export async function GET(
             id: true,
             title: true,
             code: true,
-            subject: { select: { name: true } },
+            subjectId: true,
+            parentExamId: true,
+            subject: { select: { id: true, name: true } },
           },
         },
         answers: true,
       },
     });
 
-    if (!session || session.examId !== examId) {
+    if (!session || (session.examId !== examId && session.exam?.parentExamId !== examId && examId !== "any")) {
       return NextResponse.json({ error: "Sesi ujian tidak ditemukan" }, { status: 404 });
     }
 
     // Fetch questions ordered as configured in exam (including matchingPairs)
-    const examQuestions = await prisma.examQuestion.findMany({
-      where: { examId },
+    let examQuestions = await prisma.examQuestion.findMany({
+      where: { examId: session.examId },
       include: {
         question: {
           include: {
@@ -61,6 +63,31 @@ export async function GET(
       },
       orderBy: { orderIndex: "asc" },
     });
+
+    // Fallback otomatis ke subject questions jika examQuestions belum di-bundle di DB
+    if (examQuestions.length === 0 && session.exam?.subjectId) {
+      const subjectQuestions = await prisma.question.findMany({
+        where: { subjectId: session.exam.subjectId },
+        include: {
+          options: {
+            orderBy: { orderIndex: "asc" },
+          },
+          matchingPairs: {
+            orderBy: { orderIndex: "asc" },
+          },
+        },
+        orderBy: { createdAt: "asc" },
+      });
+
+      examQuestions = subjectQuestions.map((q, idx) => ({
+        id: `auto_${q.id}`,
+        examId: session.examId,
+        questionId: q.id,
+        orderIndex: idx + 1,
+        score: q.points || 1.0,
+        question: q,
+      })) as any;
+    }
 
     const answersMap = new Map();
     for (const ans of session.answers) {
@@ -107,7 +134,7 @@ export async function GET(
 
       let isCorrect = ans?.isCorrect ?? false;
       if (ans && ans.isCorrect === null && q.type === "MULTIPLE_CHOICE") {
-        const correctOpt = q.options.find((o) => o.isCorrect);
+        const correctOpt = q.options.find((o: any) => o.isCorrect);
         isCorrect = correctOpt ? selectedOptionIds.includes(correctOpt.id) : false;
       }
 
@@ -152,7 +179,7 @@ export async function GET(
         imageUrl: q.imageUrl,
         audioUrl: q.audioUrl,
         maxScore: eq.score,
-        options: q.options.map((opt, optIdx) => ({
+        options: q.options.map((opt: any, optIdx: number) => ({
           id: opt.id,
           key: String.fromCharCode(65 + optIdx),
           content: opt.content,

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   BookOpen,
@@ -14,15 +15,38 @@ import {
   Layers,
   Sparkles,
   Eye,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
 } from "lucide-react";
 import { StudentAnswerSheetModal } from "@/components/StudentAnswerSheetModal";
 import * as XLSX from "xlsx";
 
 export default function GradesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="w-8 h-8 border-3 border-sky-400 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <GradesContent />
+    </Suspense>
+  );
+}
+
+function GradesContent() {
+  const searchParams = useSearchParams();
+  const urlExamId = searchParams.get("examId");
+
   const [grades, setGrades] = useState<any[]>([]);
+  const [examOptions, setExamOptions] = useState<{ id: string; title: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [filterExam, setFilterExam] = useState("ALL");
+  const [filterExam, setFilterExam] = useState(urlExamId || "ALL");
+  const [filterSession, setFilterSession] = useState("ALL");
   const [filterGroup, setFilterGroup] = useState("ALL");
   const [filterJurusan, setFilterJurusan] = useState("ALL");
   const [filterJalur, setFilterJalur] = useState("ALL");
@@ -30,37 +54,68 @@ export default function GradesPage() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "score" | "date">("date");
   const [sortAsc, setSortAsc] = useState(false);
-  const [selectedAnswerSheet, setSelectedAnswerSheet] = useState<{ isOpen: boolean; examId: string; sessionId: string; studentName: string } | null>(null);
+  const [selectedAnswerSheet, setSelectedAnswerSheet] = useState<{
+    isOpen: boolean;
+    examId: string;
+    sessionId: string;
+    studentName: string;
+  } | null>(null);
 
+  // Load daftar exam untuk filter dropdown
   useEffect(() => {
-    loadData();
+    fetch("/api/admin/exams")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.exams && Array.isArray(data.exams)) {
+          setExamOptions(data.exams.map((e: any) => ({ id: e.id, title: e.title })));
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  const loadData = async () => {
+  useEffect(() => {
+    loadData(urlExamId || undefined);
+  }, [urlExamId]);
+
+  const loadData = async (targetExamId?: string) => {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/grades");
+      const queryParam = targetExamId && targetExamId !== "ALL" ? `?examId=${targetExamId}` : "";
+      const res = await fetch(`/api/admin/grades${queryParam}`);
       if (res.ok) {
         const data = await res.json();
         setGrades(data.grades || []);
+        if (targetExamId && targetExamId !== "ALL") {
+          setFilterExam(targetExamId);
+        }
       }
     } catch (e) {
-      console.error(e);
+      console.error("Gagal memuat rekap nilai:", e);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleExamFilterChange = (val: string) => {
+    setFilterExam(val);
+    if (val === "ALL") {
+      loadData(undefined);
+    } else {
+      loadData(val);
+    }
+  };
+
+  // Gabungkan pilihan ujian dari API dan dari data rekap
   const exams = useMemo(() => {
-    const seen = new Set<string>();
-    return grades
-      .filter((g) => {
-        if (seen.has(g.examId)) return false;
-        seen.add(g.examId);
-        return true;
-      })
-      .map((g) => ({ id: g.examId, title: g.examTitle }));
-  }, [grades]);
+    const map = new Map<string, string>();
+    examOptions.forEach((e) => map.set(e.id, e.title));
+    grades.forEach((g) => {
+      if (g.examId && g.examTitle) {
+        map.set(g.examId, g.examTitle);
+      }
+    });
+    return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
+  }, [examOptions, grades]);
 
   const groups = useMemo(() => {
     const seen = new Set<string>();
@@ -72,6 +127,19 @@ export default function GradesPage() {
         return true;
       })
       .map((g) => ({ name: g.groupName }));
+  }, [grades]);
+
+  const sessions = useMemo(() => {
+    const seen = new Set<string>();
+    const list: string[] = [];
+    grades.forEach((g) => {
+      const s = g.sessionName || (g.isSusulan ? "Susulan" : "Sesi 1");
+      if (!seen.has(s)) {
+        seen.add(s);
+        list.push(s);
+      }
+    });
+    return list.sort();
   }, [grades]);
 
   const jurusans = useMemo(() => {
@@ -89,6 +157,12 @@ export default function GradesPage() {
   const filtered = useMemo(() => {
     let list = [...grades];
     if (filterExam !== "ALL") list = list.filter((g) => g.examId === filterExam);
+    if (filterSession !== "ALL") {
+      list = list.filter((g) => {
+        const s = g.sessionName || (g.isSusulan ? "Susulan" : "Sesi 1");
+        return s === filterSession;
+      });
+    }
     if (filterGroup !== "ALL") list = list.filter((g) => g.groupName === filterGroup);
     if (filterJurusan !== "ALL") list = list.filter((g) => (g.jurusan || "UMUM") === filterJurusan);
     if (filterJalur === "REGULER") list = list.filter((g) => !g.isPkl);
@@ -125,7 +199,7 @@ export default function GradesPage() {
     });
 
     return list;
-  }, [grades, filterExam, filterGroup, filterJurusan, filterJalur, filterStatus, search, sortBy, sortAsc]);
+  }, [grades, filterExam, filterSession, filterGroup, filterJurusan, filterJalur, filterStatus, search, sortBy, sortAsc]);
 
   const toggleSort = (col: "name" | "score" | "date") => {
     if (sortBy === col) setSortAsc(!sortAsc);
@@ -155,20 +229,26 @@ export default function GradesPage() {
     else if (scoreVal >= 75) predikat = "C";
 
     return {
-      "No": idx + 1,
-      "NIS": g.nis || g.username || "",
+      No: idx + 1,
+      NIS: g.nis || g.username || "",
       "Nama Siswa": g.studentName || "",
-      "Jurusan": g.jurusan || "-",
+      Jurusan: g.jurusan || "-",
       "Kelas / Rombel": g.groupName || "",
+      "Sesi Ujian": g.sessionName || (g.isSusulan ? "Susulan" : "Sesi 1"),
+      "Ruang Lab": g.room || "-",
       "Jalur Pelaksanaan": g.jalur || (g.isPkl ? "PKL (Smartphone HP)" : "Reguler (PC Lab)"),
       "Mata Pelajaran": g.subjectName || "",
       "Nama Ujian": g.examTitle || "",
       "Status Kehadiran": g.attendanceStatus || "",
       "Nilai Akhir": g.score !== null && g.score !== undefined ? g.score : 0,
-      "KKM": kkm,
-      "Predikat": predikat,
-      "Ketuntasan": statusKetuntasan,
-      "Keterangan": g.note || (scoreVal >= kkm ? "Kompeten" : "Perlu Remedial"),
+      "Jawaban Terjawab": g.answeredCount ?? 0,
+      "Jawaban Benar": g.correctCount ?? 0,
+      "Jawaban Salah": g.incorrectCount ?? 0,
+      "Total Soal": g.totalQuestions || 40,
+      KKM: kkm,
+      Predikat: predikat,
+      Ketuntasan: statusKetuntasan,
+      Keterangan: g.note || (scoreVal >= kkm ? "Kompeten" : "Perlu Remedial"),
     };
   };
 
@@ -179,10 +259,10 @@ export default function GradesPage() {
     // Sheet 1: Semua Jurusan
     const allRows = filtered.map(makeRow);
     const wsAll = XLSX.utils.json_to_sheet(allRows);
-    XLSX.utils.book_append_sheet(wb, wsAll, "Semua Jurusan");
+    XLSX.utils.book_append_sheet(wb, wsAll, "Semua Peserta");
 
-    // Sheet per Jurusan: TKRO, TP, TBSM, RPL
-    const jurusanList = ["TKRO", "TP", "TBSM", "RPL"];
+    // Sheet per Jurusan: TKRO, TP, TBSM, RPL, TKJ, TAV
+    const jurusanList = ["TKRO", "TP", "TBSM", "RPL", "TKJ", "TAV"];
     jurusanList.forEach((jur) => {
       const jurRows = filtered
         .filter((g) => (g.jurusan || "").toUpperCase().includes(jur))
@@ -237,11 +317,15 @@ export default function GradesPage() {
       NIS: g.nis || "",
       Jurusan: g.jurusan || "-",
       Kelas: g.groupName || "",
+      Sesi: g.sessionName || (g.isSusulan ? "Susulan" : "Sesi 1"),
+      Ruang: g.room || "-",
       Jalur: g.jalur || (g.isPkl ? "PKL (HP)" : "Reguler (PC)"),
       Ujian: g.examTitle || "",
       "Mata Pelajaran": g.subjectName || "",
       "Status Kehadiran": g.attendanceStatus || "",
       Nilai: g.score ?? "",
+      "Jawaban Benar": g.correctCount ?? 0,
+      "Total Soal": g.totalQuestions || 40,
       Keterangan: g.note || "",
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
@@ -255,68 +339,112 @@ export default function GradesPage() {
 
   const statusBadge = (status: string) => {
     if (status === "HADIR" || status === "HADIR_SUSULAN") {
-      return <span className="badge-success">Hadir</span>;
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300">
+          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+          Hadir
+        </span>
+      );
     }
     if (status === "SEDANG_MENGERJAKAN") {
-      return <span className="badge-info animate-pulse">Mengerjakan</span>;
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">
+          <Clock className="w-3 h-3 text-amber-600" />
+          Sedang Ujian
+        </span>
+      );
     }
-    if (status === "WAKTU_HABIS" || status === "DIPAKSA_SELESAI") {
-      return <span className="badge-warning">Waktu Habis</span>;
+    if (status === "DIPAKSA_SELESAI") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-indigo-100 text-indigo-900 border border-indigo-300">
+          Selesai (Pengawas)
+        </span>
+      );
     }
-    if (status === "TIDAK_HADIR") {
-      return <span className="badge-danger">Tidak Hadir</span>;
+    if (status === "WAKTU_HABIS") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-slate-100 text-slate-800 border border-slate-300">
+          Waktu Habis
+        </span>
+      );
     }
-    return <span className="badge-neutral">{status}</span>;
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-rose-100 text-rose-900 border border-rose-300">
+        <XCircle className="w-3 h-3 text-rose-600" />
+        Belum Hadir
+      </span>
+    );
   };
 
-  const SortIcon = ({ col }: { col: "name" | "score" | "date" }) =>
-    sortBy === col ? (
-      sortAsc ? (
-        <ChevronUp className="w-3.5 h-3.5 inline ml-1 text-black" />
-      ) : (
-        <ChevronDown className="w-3.5 h-3.5 inline ml-1 text-black" />
-      )
-    ) : null;
+  const sessionBadge = (sessionName: string, isSusulan: boolean, room?: string) => {
+    const sName = sessionName || (isSusulan ? "Susulan" : "Sesi 1");
+    let colorClass = "bg-sky-100 text-sky-950 border-sky-300";
+    if (sName.includes("1")) colorClass = "bg-blue-100 text-blue-950 border-blue-300";
+    else if (sName.includes("2")) colorClass = "bg-indigo-100 text-indigo-950 border-indigo-300";
+    else if (sName.includes("3")) colorClass = "bg-purple-100 text-purple-950 border-purple-300";
+    else if (isSusulan || sName.toLowerCase().includes("susulan")) colorClass = "bg-amber-100 text-amber-950 border-amber-300";
+
+    return (
+      <div className="flex flex-col items-start gap-0.5">
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black border ${colorClass}`}>
+          <Clock className="w-2.5 h-2.5" />
+          {sName}
+        </span>
+        {room && room !== "-" && (
+          <span className="text-[10px] font-bold text-black opacity-80">
+            {room}
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  const SortIcon = ({ col }: { col: "name" | "score" | "date" }) => {
+    if (sortBy !== col) return null;
+    return sortAsc ? (
+      <ChevronUp className="w-3.5 h-3.5 inline ml-0.5 text-black" />
+    ) : (
+      <ChevronDown className="w-3.5 h-3.5 inline ml-0.5 text-black" />
+    );
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="page-header">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="page-title text-black flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-black" />
-            Rekap Nilai & Asesmen Siswa (Multi-Jurusan & PKL)
+          <h1 className="text-2xl font-black text-black flex items-center gap-2">
+            <BarChart3 className="w-7 h-7 text-sky-600" />
+            Rekap Nilai & Analisis Ujian CBT
           </h1>
-          <p className="page-subtitle text-black font-bold">
-            Total {filtered.length} data peserta • Rata-rata nilai: <strong className="text-black font-black text-sm">{avgScore}</strong>
+          <p className="text-xs text-black font-semibold mt-1">
+            Data rekapitulasi nilai, sesi pengerjaan, dan analisis butir jawaban peserta ujian secara real-time
           </p>
         </div>
-        <div className="header-actions flex-wrap">
-          <Link
-            href={filterExam !== "ALL" ? `/admin/exams/${filterExam}/essay-grading` : "/admin/essay-grading"}
-            className="btn-secondary text-blue-900 border-blue-300 hover:bg-blue-50 shadow-xs flex items-center gap-1.5"
-            title="Buka Lembar Periksa & Validasi Jawaban Esai Siswa (AI Gemini)"
-          >
-            <BookOpen className="w-4 h-4 text-blue-700" />
-            <span className="text-black font-black">Periksa Jawaban Esai (AI)</span>
-          </Link>
 
-          <button onClick={loadData} className="btn-icon" title="Refresh Data">
-            <RefreshCw className="w-4 h-4 text-black" />
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => loadData(filterExam !== "ALL" ? filterExam : undefined)}
+            className="btn-secondary"
+            title="Muat Ulang Data"
+          >
+            <RefreshCw className={`w-4 h-4 text-black ${loading ? "animate-spin" : ""}`} />
+            <span className="text-black font-black">Refresh</span>
           </button>
 
           <button
             onClick={exportMultiSheet}
-            className="px-3.5 py-2 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl text-xs font-black shadow-md shadow-blue-700/20 flex items-center gap-1.5 transition cursor-pointer"
-            title="Download 1 File Excel dengan Sheet Terpisah per Jurusan & PKL"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs hover:opacity-95 transition"
+            title="Download Excel Multi-Sheet Pintar (Semua Jurusan + Sheet Khusus PKL + Reguler)"
           >
             <Layers className="w-4 h-4 text-white" />
-            <span>📊 Multi-Sheet per Jurusan (.xlsx)</span>
+            <span>Excel Multi-Sheet Pintar</span>
           </button>
 
           <button
             onClick={() => exportExcel("ERAPOR")}
-            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black shadow-md shadow-emerald-600/20 flex items-center gap-1.5 transition cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs hover:opacity-95 transition"
             title="Download Rekap Nilai Format Standar e-Rapor / Dapodik"
           >
             <Download className="w-4 h-4 text-white" />
@@ -333,9 +461,9 @@ export default function GradesPage() {
         </div>
       </div>
 
-      {/* Filters (Grid 6 Kolom Responsive) */}
+      {/* Filters (Grid 7 Kolom Responsive) */}
       <div className="glass p-4 rounded-2xl shadow-soft border border-sky-300">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
           {/* 1. Search */}
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-black" />
@@ -350,7 +478,7 @@ export default function GradesPage() {
           {/* 2. Filter Ujian / Mapel */}
           <select
             value={filterExam}
-            onChange={(e) => setFilterExam(e.target.value)}
+            onChange={(e) => handleExamFilterChange(e.target.value)}
             className="form-input font-bold"
           >
             <option value="ALL">— Semua Ujian / Mapel —</option>
@@ -361,7 +489,21 @@ export default function GradesPage() {
             ))}
           </select>
 
-          {/* 3. Filter Jurusan */}
+          {/* 3. Filter Sesi (Baru!) */}
+          <select
+            value={filterSession}
+            onChange={(e) => setFilterSession(e.target.value)}
+            className="form-input font-bold"
+          >
+            <option value="ALL">— Semua Sesi —</option>
+            {sessions.map((s: string) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+
+          {/* 4. Filter Jurusan */}
           <select
             value={filterJurusan}
             onChange={(e) => setFilterJurusan(e.target.value)}
@@ -375,7 +517,7 @@ export default function GradesPage() {
             ))}
           </select>
 
-          {/* 4. Filter Jalur Pelaksanaan (Sekolah vs PKL) */}
+          {/* 5. Filter Jalur Pelaksanaan (Sekolah vs PKL) */}
           <select
             value={filterJalur}
             onChange={(e) => setFilterJalur(e.target.value)}
@@ -386,7 +528,7 @@ export default function GradesPage() {
             <option value="PKL">🏭 PKL (Smartphone HP)</option>
           </select>
 
-          {/* 5. Filter Kelas / Rombel */}
+          {/* 6. Filter Kelas / Rombel */}
           <select
             value={filterGroup}
             onChange={(e) => setFilterGroup(e.target.value)}
@@ -400,7 +542,7 @@ export default function GradesPage() {
             ))}
           </select>
 
-          {/* 6. Filter Status Kehadiran */}
+          {/* 7. Filter Status Kehadiran */}
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -444,8 +586,10 @@ export default function GradesPage() {
                   </th>
                   <th className="table-th">Jurusan & Jalur</th>
                   <th className="table-th">Kelas / Rombel</th>
+                  <th className="table-th">Sesi</th>
                   <th className="table-th">Ujian & Mapel</th>
                   <th className="table-th">Status</th>
+                  <th className="table-th text-center">Rincian Jawaban</th>
                   <th
                     className="table-th cursor-pointer select-none text-right"
                     onClick={() => toggleSort("score")}
@@ -490,6 +634,9 @@ export default function GradesPage() {
                     <td className="table-td text-black font-bold">
                       {g.groupName || "-"}
                     </td>
+                    <td className="table-td">
+                      {sessionBadge(g.sessionName, g.isSusulan, g.room)}
+                    </td>
                     <td className="table-td max-w-[200px] truncate">
                       <div className="text-black font-black truncate">
                         {g.examTitle}
@@ -500,6 +647,33 @@ export default function GradesPage() {
                     </td>
                     <td className="table-td">
                       {statusBadge(g.attendanceStatus)}
+                    </td>
+                    {/* Kolom Rincian Jawaban */}
+                    <td className="table-td text-center">
+                      {g.session?.id ? (
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[11px] font-bold text-slate-700">
+                            {g.answeredCount ?? 0} / {g.totalQuestions || 40} Terjawab
+                          </span>
+                          <div className="flex items-center gap-1 flex-wrap justify-center">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300">
+                              ✓ {g.correctCount ?? 0}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-rose-100 text-rose-900 border border-rose-300">
+                              ✗ {g.incorrectCount ?? 0}
+                            </span>
+                            {Boolean(g.doubtfulCount > 0) && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
+                                ? {g.doubtfulCount}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 text-[11px] italic font-medium">
+                          Belum mengerjakan
+                        </span>
+                      )}
                     </td>
                     <td className="table-td text-right">
                       {g.score !== null && g.score !== undefined ? (
