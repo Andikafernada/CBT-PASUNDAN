@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   XCircle,
   HelpCircle,
+  AlertCircle,
 } from "lucide-react";
 import { StudentAnswerSheetModal } from "@/components/StudentAnswerSheetModal";
 import * as XLSX from "xlsx";
@@ -240,10 +241,12 @@ function GradesContent() {
       "Mata Pelajaran": g.subjectName || "",
       "Nama Ujian": g.examTitle || "",
       "Status Kehadiran": g.attendanceStatus || "",
-      "Nilai Akhir": g.score !== null && g.score !== undefined ? g.score : 0,
-      "Jawaban Terjawab": g.answeredCount ?? 0,
-      "Jawaban Benar": g.correctCount ?? 0,
-      "Jawaban Salah": g.incorrectCount ?? 0,
+      "Nilai Akhir (Skala 100)": g.score !== null && g.score !== undefined ? g.score : 0,
+      "Poin Diperoleh": g.totalScoreAwarded ?? 0,
+      "Benar Penuh (1 Poin)": g.fullCorrectCount ?? 0,
+      "Sebagian Benar (Parsial)": g.partialCorrectCount ?? 0,
+      "Salah (0 Poin)": g.incorrectCount ?? 0,
+      "Kosong (Belum Diisi)": g.unansweredCount ?? 0,
       "Total Soal": g.totalQuestions || 40,
       KKM: kkm,
       Predikat: predikat,
@@ -324,7 +327,11 @@ function GradesContent() {
       "Mata Pelajaran": g.subjectName || "",
       "Status Kehadiran": g.attendanceStatus || "",
       Nilai: g.score ?? "",
-      "Jawaban Benar": g.correctCount ?? 0,
+      "Poin Diperoleh": g.totalScoreAwarded ?? 0,
+      "Benar Penuh": g.fullCorrectCount ?? 0,
+      "Sebagian Benar": g.partialCorrectCount ?? 0,
+      Salah: g.incorrectCount ?? 0,
+      Kosong: g.unansweredCount ?? 0,
       "Total Soal": g.totalQuestions || 40,
       Keterangan: g.note || "",
     }));
@@ -418,7 +425,7 @@ function GradesContent() {
             Rekap Nilai & Analisis Ujian CBT
           </h1>
           <p className="text-xs text-black font-semibold mt-1">
-            Data rekapitulasi nilai, sesi pengerjaan, dan analisis butir jawaban peserta ujian secara real-time
+            Data rekapitulasi nilai, sesi pengerjaan, dan rincian butir jawaban peserta ujian secara real-time
           </p>
         </div>
 
@@ -589,7 +596,7 @@ function GradesContent() {
                   <th className="table-th">Sesi</th>
                   <th className="table-th">Ujian & Mapel</th>
                   <th className="table-th">Status</th>
-                  <th className="table-th text-center">Rincian Jawaban</th>
+                  <th className="table-th text-center">Rincian Jawaban & Poin</th>
                   <th
                     className="table-th cursor-pointer select-none text-right"
                     onClick={() => toggleSort("score")}
@@ -648,23 +655,49 @@ function GradesContent() {
                     <td className="table-td">
                       {statusBadge(g.attendanceStatus)}
                     </td>
-                    {/* Kolom Rincian Jawaban */}
+                    {/* Kolom Rincian Jawaban & Poin */}
                     <td className="table-td text-center">
                       {g.session?.id ? (
                         <div className="flex flex-col items-center gap-1">
-                          <span className="text-[11px] font-bold text-slate-700">
+                          <span className="text-[11px] font-bold text-slate-800">
                             {g.answeredCount ?? 0} / {g.totalQuestions || 40} Terjawab
+                            {g.totalScoreAwarded !== undefined && (
+                              <span className="text-[10px] text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded ml-1 font-black border border-blue-200">
+                                {g.totalScoreAwarded} poin
+                              </span>
+                            )}
                           </span>
                           <div className="flex items-center gap-1 flex-wrap justify-center">
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300">
-                              ✓ {g.correctCount ?? 0}
-                            </span>
+                            {/* Jika ada partial credit */}
+                            {Boolean(g.partialCorrectCount && g.partialCorrectCount > 0) ? (
+                              <>
+                                <span
+                                  className="px-1.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300"
+                                  title="Benar Penuh (1.0 poin per butir)"
+                                >
+                                  ✓ {g.fullCorrectCount ?? 0} Penuh
+                                </span>
+                                <span
+                                  className="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-950 border border-amber-300"
+                                  title="Sebagian Benar (Poin parsial pada PG Kompleks / Menjodohkan)"
+                                >
+                                  ~ {g.partialCorrectCount} Sebagian
+                                </span>
+                              </>
+                            ) : (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                ✓ {g.correctCount ?? 0} Benar
+                              </span>
+                            )}
                             <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-rose-100 text-rose-900 border border-rose-300">
-                              ✗ {g.incorrectCount ?? 0}
+                              ✗ {g.incorrectCount ?? 0} Salah
                             </span>
-                            {Boolean(g.doubtfulCount > 0) && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
-                                ? {g.doubtfulCount}
+                            {Boolean(g.unansweredCount && g.unansweredCount > 0) && (
+                              <span
+                                className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-300"
+                                title="Kosong belum dijawab (0 poin)"
+                              >
+                                ⚪ {g.unansweredCount} Kosong
                               </span>
                             )}
                           </div>
@@ -705,7 +738,7 @@ function GradesContent() {
                             })
                           }
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-300 rounded-xl text-xs font-black transition shadow-xs cursor-pointer"
-                          title="Lihat Lembar Jawaban Lengkap Siswa"
+                          title="Lihat Lembar Analisis Jawaban Lengkap Siswa"
                         >
                           <Eye className="w-3.5 h-3.5 text-blue-700" />
                           <span>Lembar Jawaban</span>

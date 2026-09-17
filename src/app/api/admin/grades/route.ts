@@ -206,7 +206,7 @@ export async function GET(req: NextRequest) {
 
     if (format === "csv") {
       const csvHeader =
-        "No,NIS,Nama Siswa,Jurusan,Kelas,Sesi,Ruang,Jalur,Mata Pelajaran,Guru,Judul Ujian,Tanggal Ujian,Status,Nilai,Jawaban Benar,Total Soal,Keterangan\n";
+        "No,NIS,Nama Siswa,Jurusan,Kelas,Sesi,Ruang,Jalur,Mata Pelajaran,Guru,Judul Ujian,Tanggal Ujian,Status,Nilai,Poin Diperoleh,Benar Penuh,Sebagian Benar,Salah,Kosong,Total Soal,Keterangan\n";
       const csvRows = gradeRows.map((r, i) =>
         [
           i + 1,
@@ -223,7 +223,11 @@ export async function GET(req: NextRequest) {
           r.examDate,
           r.attendanceStatus,
           r.score !== null ? r.score : "-",
-          r.correctCount || 0,
+          r.totalScoreAwarded ?? 0,
+          r.fullCorrectCount ?? 0,
+          r.partialCorrectCount ?? 0,
+          r.incorrectCount ?? 0,
+          r.unansweredCount ?? 0,
           r.totalQuestions || 40,
           `"${r.note}"`,
         ].join(",")
@@ -270,8 +274,11 @@ function buildGradeRow(
 
   let answeredCount = 0;
   let correctCount = 0;
+  let fullCorrectCount = 0;
+  let partialCorrectCount = 0;
   let incorrectCount = 0;
   let doubtfulCount = 0;
+  let totalScoreAwarded = 0;
 
   if (session) {
     score = session.score;
@@ -300,9 +307,16 @@ function buildGradeRow(
 
         if (isAns) {
           answeredCount++;
-          if (ans.isCorrect === true) {
+          const scoreAw = Number(ans.scoreAwarded) || 0;
+          totalScoreAwarded += scoreAw;
+
+          if (scoreAw >= 1.0) {
+            fullCorrectCount++;
             correctCount++;
-          } else if (ans.isCorrect === false) {
+          } else if (scoreAw > 0) {
+            partialCorrectCount++;
+            correctCount++;
+          } else {
             incorrectCount++;
           }
         }
@@ -318,6 +332,8 @@ function buildGradeRow(
     exam.examQuestions && exam.examQuestions.length > 0
       ? exam.examQuestions.length
       : exam.subject?._count?.questions || 40;
+
+  const unansweredCount = Math.max(0, totalQuestions - answeredCount);
 
   // Tentukan Sesi dan Ruangan
   const matchedEg =
@@ -357,9 +373,13 @@ function buildGradeRow(
     room,
     totalQuestions,
     answeredCount,
+    unansweredCount,
     correctCount,
+    fullCorrectCount,
+    partialCorrectCount,
     incorrectCount,
     doubtfulCount,
+    totalScoreAwarded: Math.round(totalScoreAwarded * 100) / 100,
     session: session
       ? {
           id: session.id,
