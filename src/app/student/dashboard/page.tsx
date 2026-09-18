@@ -288,19 +288,42 @@ export default function StudentDashboardPage() {
 
 
 
-  const filteredExams = exams.filter((item) => {
-    // 1. Filter by Grade Level (Super Reviewer / Multi-Grade)
+  const isFinishedSession = (item: any) => {
+    const s = item.sessionStatus || item.session?.status;
+    return s === "COMPLETED" || s === "FORCE_FINISHED" || s === "TIMEOUT";
+  };
+
+  const isInProgressSession = (item: any) => {
+    const s = item.sessionStatus || item.session?.status;
+    return s === "IN_PROGRESS" || s === "SUSPENDED";
+  };
+
+  // 1. Filter by Grade Level first (Super Reviewer / Multi-Grade)
+  const gradeFilteredExams = exams.filter((item) => {
     if (gradeFilter !== "ALL" && item.gradeLevel !== gradeFilter) {
       return false;
     }
+    return true;
+  });
 
-    // 2. Filter by Status Tab
-    const isFinished = item.sessionStatus === "COMPLETED" || item.sessionStatus === "FORCE_FINISHED" || item.sessionStatus === "TIMEOUT";
-    const isInProgress = item.sessionStatus === "IN_PROGRESS" || item.sessionStatus === "SUSPENDED";
+  // Tab Badge Counts
+  const totalCount = gradeFilteredExams.length;
+  const activeCount = gradeFilteredExams.filter(
+    (item) => !isFinishedSession(item) && (isInProgressSession(item) || item.scheduleStatus !== "BELUM_MULAI")
+  ).length;
+  const completedCount = gradeFilteredExams.filter((item) => isFinishedSession(item)).length;
 
-    if (activeTab === "ACTIVE") return isInProgress || item.status === "BERLANGSUNG";
-    if (activeTab === "COMPLETED") return isFinished;
-    if (activeTab === "UPCOMING") return item.status === "BELUM_MULAI" && !isInProgress && !isFinished;
+  // 2. Filter by Status Tab
+  const filteredExams = gradeFilteredExams.filter((item) => {
+    const isFinished = isFinishedSession(item);
+    const isInProgress = isInProgressSession(item);
+
+    if (activeTab === "ACTIVE") {
+      return !isFinished && (isInProgress || item.scheduleStatus !== "BELUM_MULAI");
+    }
+    if (activeTab === "COMPLETED") {
+      return isFinished;
+    }
     return true;
   });
 
@@ -312,14 +335,14 @@ export default function StudentDashboardPage() {
 
       {/* Top Navbar */}
 
-      <header className="sticky top-0 z-40 border-b border-sky-300 bg-sky-100/95 backdrop-blur-xl px-3 sm:px-6 py-2.5 shadow-xs">
+      <header className="sticky top-0 z-40 border-b border-sky-300 bg-sky-100/95 backdrop-blur-xl px-3 sm:px-6 py-2 sm:py-2.5 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           {/* Logo & Student Identity */}
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <NavinLogo variant="icon-only" size="md" className="rounded-xl shadow-xs flex-shrink-0" />
-            <div className="border-l border-sky-300 pl-2.5 sm:pl-3 min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="font-black text-sm sm:text-base text-slate-900 truncate max-w-[150px] sm:max-w-none leading-tight">
+            <div className="border-l border-sky-300 pl-2 sm:pl-3 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+                <span className="font-black text-xs sm:text-sm text-slate-900 truncate leading-tight">
                   {cleanName}
                 </span>
                 <span className="text-[9px] sm:text-[10px] uppercase font-black px-1.5 sm:px-2 py-0.5 rounded-full bg-sky-500 text-white shadow-2xs flex-shrink-0">
@@ -327,7 +350,7 @@ export default function StudentDashboardPage() {
                 </span>
               </div>
               <p className="text-[10px] sm:text-[11px] text-sky-900 font-bold flex items-center gap-1.5 mt-0.5 truncate">
-                <span className="font-mono bg-white/80 px-1.5 py-0.2 rounded border border-sky-200">
+                <span className="font-mono bg-white/80 px-1.5 py-0.5 rounded border border-sky-200">
                   NIS: {currentUser?.nis || currentUser?.username || "-"}
                 </span>
                 <span className="hidden sm:inline">•</span>
@@ -336,13 +359,13 @@ export default function StudentDashboardPage() {
             </div>
           </div>
 
-          {/* Right: Theme & Logout */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Right: Actions */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             <PwaInstallButton variant="compact" />
-            <ThemeToggle />
+            <ThemeToggle className="hidden md:flex" />
             <button
               onClick={handleLogout}
-              className="p-2 rounded-xl bg-white border border-sky-300 text-slate-700 hover:bg-rose-50 hover:text-rose-600 transition cursor-pointer shadow-xs"
+              className="p-2 rounded-xl bg-white border border-sky-300 text-slate-700 hover:bg-rose-50 hover:text-rose-600 transition cursor-pointer shadow-xs flex items-center justify-center"
               title="Keluar"
             >
               <LogOut className="w-4 h-4" />
@@ -370,11 +393,7 @@ export default function StudentDashboardPage() {
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tight leading-snug">
-
-            <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tight leading-snug">
               Selamat Datang, {cleanName}!
-            </h2>
-
             </h2>
 
             <p className="text-xs sm:text-sm text-black font-semibold mt-1.5 leading-relaxed">
@@ -399,23 +418,32 @@ export default function StudentDashboardPage() {
 
         {/* Filter Tabs */}
         <div className="space-y-3">
-          {/* Status Tabs */}
+          {/* Status Tabs with Live Count Badges */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             {[
-              { id: "ALL", label: "Semua Ujian" },
-              { id: "ACTIVE", label: "Ujian Berlangsung" },
-              { id: "COMPLETED", label: "Riwayat Selesai" },
+              { id: "ALL", label: "Semua Ujian", count: totalCount },
+              { id: "ACTIVE", label: "Ujian Berlangsung", count: activeCount },
+              { id: "COMPLETED", label: "Riwayat Selesai", count: completedCount },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition whitespace-nowrap cursor-pointer ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                   activeTab === tab.id
                     ? "bg-blue-600 text-white shadow-md"
                     : "bg-white text-slate-700 border border-sky-200 hover:bg-sky-50 font-bold"
                 }`}
               >
-                {tab.label}
+                <span>{tab.label}</span>
+                <span
+                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
+                    activeTab === tab.id
+                      ? "bg-white/25 text-white"
+                      : "bg-sky-100 text-sky-800"
+                  }`}
+                >
+                  {tab.count}
+                </span>
               </button>
             ))}
           </div>
@@ -462,14 +490,26 @@ export default function StudentDashboardPage() {
 
           <div className="glass p-12 text-center rounded-3xl shadow-soft">
 
-            <FileText className="w-12 h-12 text-black mx-auto mb-3 opacity-60" />
+            {activeTab === "COMPLETED" ? (
+              <ClipboardCheck className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+            ) : (
+              <FileText className="w-12 h-12 text-black mx-auto mb-3 opacity-60" />
+            )}
 
-            <h3 className="font-black text-sm text-black">Tidak Ada Ujian Ditemukan</h3>
+            <h3 className="font-black text-sm text-black">
+              {activeTab === "COMPLETED"
+                ? "Belum Ada Ujian yang Selesai"
+                : activeTab === "ACTIVE"
+                ? "Tidak Ada Ujian Berlangsung"
+                : "Tidak Ada Ujian Ditemukan"}
+            </h3>
 
             <p className="text-xs text-black font-medium mt-1">
-
-              Saat ini belum ada jadwal ujian untuk kategori ini.
-
+              {activeTab === "COMPLETED"
+                ? "Riwayat ujian yang telah Anda selesaikan dan kumpulkan akan tercatat di sini."
+                : activeTab === "ACTIVE"
+                ? "Saat ini tidak ada ujian aktif atau terjadwal yang sedang berlangsung."
+                : "Saat ini belum ada jadwal ujian untuk kategori atau kelas yang dipilih."}
             </p>
 
           </div>
@@ -479,8 +519,9 @@ export default function StudentDashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
             {filteredExams.map((item) => {
-              const isFinished = item.sessionStatus === "COMPLETED" || item.sessionStatus === "FORCE_FINISHED" || item.sessionStatus === "TIMEOUT";
-              const isInProgress = item.sessionStatus === "IN_PROGRESS" || item.sessionStatus === "SUSPENDED";
+              const isFinished = isFinishedSession(item);
+              const isInProgress = isInProgressSession(item);
+              const score = item.session?.score ?? item.score;
 
               return (
                 <div
@@ -491,7 +532,7 @@ export default function StudentDashboardPage() {
                     {/* Top Tag Row: Grade Badge & Status */}
                     <div className="flex items-center justify-between gap-2">
                       <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black bg-sky-100 text-sky-800 border border-sky-200">
-                        {item.gradeLevel ? `Kelas ${item.gradeLevel}` : (item.category || "Reguler")}
+                        {item.gradeLevel && item.gradeLevel !== "LAINNYA" ? `Kelas ${item.gradeLevel}` : (item.category || "Reguler")}
                       </span>
 
                       {isFinished ? (
@@ -509,7 +550,7 @@ export default function StudentDashboardPage() {
                       )}
                     </div>
 
-                    {/* Clean Title & Subtitle (No Duplicate Title Box!) */}
+                    {/* Clean Title & Subtitle */}
                     <div>
                       <h3 className="font-black text-base text-slate-900 group-hover:text-blue-600 transition line-clamp-2 leading-snug">
                         {item.title}
@@ -519,7 +560,7 @@ export default function StudentDashboardPage() {
                       </p>
                     </div>
 
-                    {/* Stats: Duration & Questions (Accurate questionCount!) */}
+                    {/* Stats: Duration & Questions */}
                     <div className="grid grid-cols-2 gap-2 pt-3 border-t border-sky-100 text-xs">
                       <div className="flex items-center gap-1.5 text-slate-700 font-bold">
                         <Clock className="w-3.5 h-3.5 text-sky-600" />
@@ -527,9 +568,22 @@ export default function StudentDashboardPage() {
                       </div>
                       <div className="flex items-center gap-1.5 text-slate-700 font-bold">
                         <Layers className="w-3.5 h-3.5 text-sky-600" />
-                        <span>{item.questionCount || item.totalQuestions || 40} Soal</span>
+                        <span>{item.questionCount || 40} Soal</span>
                       </div>
                     </div>
+
+                    {/* Perolehan Nilai jika sudah selesai */}
+                    {isFinished && score !== null && score !== undefined && (
+                      <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 mt-1">
+                        <span className="text-xs font-bold flex items-center gap-1.5">
+                          <Award className="w-3.5 h-3.5 text-emerald-600" />
+                          Nilai Perolehan:
+                        </span>
+                        <span className="text-sm font-black text-emerald-700">
+                          {Number(score).toFixed(1)}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Bottom Actions */}

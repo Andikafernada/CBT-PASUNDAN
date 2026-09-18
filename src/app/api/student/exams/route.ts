@@ -144,6 +144,18 @@ export async function GET() {
 
       // Sesi rombel info (jika ada)
       const groupInfo = Array.isArray(exam.examGroups) && exam.examGroups.length > 0 ? exam.examGroups[0] : null;
+      const start = groupInfo?.startTime || exam.startTime || null;
+      const end = groupInfo?.endTime || exam.endTime || null;
+
+      const now = new Date();
+      let scheduleStatus = "BERLANGSUNG";
+      if (start && new Date(start) > now) {
+        scheduleStatus = "BELUM_MULAI";
+      } else if (end && new Date(end) < now) {
+        scheduleStatus = "SELESAI_JADWAL";
+      }
+
+      const sessionStatus = session?.status || null;
 
       return {
         id: exam.id,
@@ -160,8 +172,12 @@ export async function GET() {
         token: isSuperReviewer ? exam.token : undefined,
         sessionName: groupInfo?.sessionName || null,
         room: groupInfo?.room || null,
-        effectiveStartTime: groupInfo?.startTime || exam.startTime || null,
-        effectiveEndTime: groupInfo?.endTime || exam.endTime || null,
+        effectiveStartTime: start,
+        effectiveEndTime: end,
+        scheduleStatus,
+        status: scheduleStatus,
+        sessionStatus,
+        score: session?.score ?? null,
         session: session
           ? {
               id: session.id,

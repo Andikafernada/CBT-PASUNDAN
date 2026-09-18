@@ -322,11 +322,11 @@ export function PwaInstallButton({
       <>
         <button
           onClick={handleClick}
-          className={`flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer ${className}`}
+          className={`flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer ${className}`}
           title="Pasang Aplikasi Navin CBT"
         >
-          <Smartphone className="w-3.5 h-3.5 text-blue-600" />
-          <span>Pasang App</span>
+          <Smartphone className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-blue-600 flex-shrink-0" />
+          <span className="hidden sm:inline">Pasang App</span>
         </button>
         <PwaGuideModal
           isOpen={showModal}
