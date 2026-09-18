@@ -4126,973 +4126,249 @@ Lanjutkan?`
 
 
           {filteredExams.map((exam) => {
-
-
-
             const isSelected = selectedIds.includes(exam.id);
-
-
+            const status = getExamStatus(exam);
+            const grade = getExamGrade(exam);
 
             return (
-
-
-
-            <div
-
-
-
-              key={exam.id}
-
-
-
-              className={`glass p-5 flex flex-col justify-between hover:shadow-glow transition relative overflow-hidden ${
-
-
-
-                isSelected ? "ring-2 ring-blue-500 bg-sky-50/70 dark:bg-sky-100/50 shadow-md" : ""
-
-
-
-              }`}
-
-
-
-            >
-
-
-
-              <div>
-
-
-
-                <div className="flex items-center justify-between gap-2 mb-3">
-
-
-
-                  <div className="flex items-center gap-1.5 flex-wrap">
-
-
-
-                    {/* Card Selection Checkbox */}
-
-
-
-                    <button
-
-
-
-                      type="button"
-
-
-
-                      onClick={(e) => {
-
-
-
-                        e.stopPropagation();
-
-
-
-                        handleToggleSelect(exam.id);
-
-
-
-                      }}
-
-
-
-                      className="p-1 -ml-1 text-slate-700 dark:text-black hover:text-blue-600 transition cursor-pointer"
-
-
-
-                      title={isSelected ? "Batal pilih jadwal ujian ini" : "Pilih jadwal ujian ini"}
-
-
-
-                    >
-
-
-
-                      {isSelected ? (
-
-
-
-                        <CheckSquare className="w-5 h-5 text-blue-600 fill-blue-50" />
-
-
-
+              <div
+                key={exam.id}
+                className={`glass p-5 rounded-2xl flex flex-col justify-between hover:shadow-lg transition-all border ${
+                  isSelected
+                    ? "ring-2 ring-blue-500 bg-blue-50/70 dark:bg-blue-950/30 border-blue-400 shadow-md"
+                    : "border-slate-200/80 hover:border-blue-300"
+                }`}
+              >
+                <div>
+                  {/* Row 1: Checkbox, Badges (Status, Kelas, Kategori), Token & Actions */}
+                  <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-100">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {/* Checkbox */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleSelect(exam.id);
+                        }}
+                        className="p-1 -ml-1 text-slate-500 hover:text-blue-600 transition cursor-pointer"
+                        title={isSelected ? "Batal pilih ujian ini" : "Pilih ujian ini"}
+                      >
+                        {isSelected ? (
+                          <CheckSquare className="w-4 h-4 text-blue-600 fill-blue-50" />
+                        ) : (
+                          <Square className="w-4 h-4 text-slate-400 hover:text-slate-600" />
+                        )}
+                      </button>
+
+                      {/* Status Badge */}
+                      {status === "ACTIVE" ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                          AKTIF
+                        </span>
+                      ) : status === "SCHEDULED" ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                          TERJADWAL
+                        </span>
                       ) : (
-
-
-
-                        <Square className="w-5 h-5 text-slate-400 hover:text-slate-700" />
-
-
-
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-300">
+                          SELESAI
+                        </span>
                       )}
 
-
-
-                    </button>
-
-
-
-
-
-
-
-                    <span className="px-2.5 py-1 text-[11px] font-semibold badge-info font-black">
-
-
-
-                      {exam.subject?.name}
-
-
-
-                    </span>
-
-
-
-                    {/* Grade Badge */}
-
-
-
-                    {(() => {
-
-
-
-                      const grade = getExamGrade(exam);
-
-
-
-                      if (grade === "X") {
-
-
-
-                        return (
-
-
-
-                          <span className="px-2 py-0.5 text-[10px] font-black bg-emerald-100 text-emerald-950 border border-emerald-300 rounded-md">
-
-
-
-                            KELAS X
-
-
-
-                          </span>
-
-
-
-                        );
-
-
-
-                      } else if (grade === "XI") {
-
-
-
-                        return (
-
-
-
-                          <span className="px-2 py-0.5 text-[10px] font-black bg-cyan-100 text-cyan-950 border border-cyan-300 rounded-md">
-
-
-
-                            KELAS XI
-
-
-
-                          </span>
-
-
-
-                        );
-
-
-
-                      } else if (grade === "XII") {
-
-
-
-                        return (
-
-
-
-                          <span className="px-2 py-0.5 text-[10px] font-black bg-indigo-100 text-indigo-950 border border-indigo-300 rounded-md">
-
-
-
-                            KELAS XII
-
-
-
-                          </span>
-
-
-
-                        );
-
-
-
-                      }
-
-
-
-                      return null;
-
-
-
-                    })()}
-
-
-
-                    {/* Category Badge */}
-
-
-
-                    {exam.category === "PKL" ? (
-
-
-
-                      <span className="px-2 py-0.5 text-[10px] font-black bg-purple-100 text-purple-900 border border-purple-300 rounded-md">
-
-
-
-                        KHUSUS PKL
-
-
-
-                      </span>
-
-
-
-                    ) : (
-
-
-
-                      <span className="px-2 py-0.5 text-[10px] font-black bg-blue-100 text-blue-900 border border-blue-300 rounded-md">
-
-
-
-                        REGULER
-
-
-
-                      </span>
-
-
-
-                    )}
-
-
-
-                    {/* Status Badge */}
-
-
-
-                    {(() => {
-
-
-
-                      const status = getExamStatus(exam);
-
-
-
-                      if (status === "ACTIVE") {
-
-
-
-                        return (
-
-
-
-                          <span className="px-2 py-0.5 text-[10px] font-black bg-emerald-600 text-white rounded-md flex items-center gap-1 shadow-2xs">
-
-
-
-                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
-
-
-
-                            AKTIF
-
-
-
-                          </span>
-
-
-
-                        );
-
-
-
-                      } else if (status === "SCHEDULED") {
-
-
-
-                        return (
-
-
-
-                          <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-950 border border-amber-300 rounded-md">
-
-
-
-                            TERJADWAL
-
-
-
-                          </span>
-
-
-
-                        );
-
-
-
-                      } else {
-
-
-
-                        return (
-
-
-
-                          <span className="px-2 py-0.5 text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-300 rounded-md">
-
-
-
-                            SELESAI
-
-
-
-                          </span>
-
-
-
-                        );
-
-
-
-                      }
-
-
-
-                    })()}
-
-
-
-                    {exam.disableAntiCheat && (
-
-
-
-                      <span className="px-2 py-0.5 text-[10px] font-black bg-amber-100 text-amber-950 border border-amber-300 rounded-md">
-
-
-
-                        🛡️ Bebas Pelanggaran
-
-
-
-                      </span>
-
-
-
-                    )}
-
-
-
-                  </div>
-
-
-
-                  <div className="flex items-center gap-1.5 font-mono text-xs px-2 py-0.5 bg-sky-200 border border-sky-300 rounded-lg text-black font-black">
-
-
-
-                    <Key className="w-3 h-3 text-black" />
-
-
-
-                    <span>{exam.token || "TANPA TOKEN"}</span>
-
-
-
-                  </div>
-
-
-
-                </div>
-
-
-
-
-
-
-
-                <div className="flex items-start justify-between gap-2">
-
-
-
-                  <h3 className="text-base font-black text-black mb-1 line-clamp-1">{exam.title}</h3>
-
-
-
-                  <div className="flex items-center gap-1 shrink-0">
-
-
-
-                    <button
-
-
-
-                      onClick={() => {
-
-
-
-                        setEditForm({
-
-
-
-                          id: exam.id,
-
-
-
-                          title: exam.title,
-
-
-
-                          code: exam.code,
-
-
-
-                          description: exam.description || "",
-
-
-
-                          subjectId: exam.subjectId,
-
-
-
-                          category: exam.category || "REGULER",
-
-
-
-                          disableAntiCheat: Boolean(exam.disableAntiCheat),
-
-
-
-                          durationMinutes: exam.durationMinutes,
-
-
-
-                          startTime: toLocalDatetimeString(exam.startTime),
-
-
-
-                          endTime: toLocalDatetimeString(exam.endTime),
-
-
-
-                          token: exam.token || "ZYACBT",
-
-
-
-                          isTokenDynamic: exam.isTokenDynamic,
-
-
-
-                          shuffleQuestions: exam.shuffleQuestions,
-
-
-
-                          shuffleOptions: exam.shuffleOptions,
-
-
-
-                          showResult: exam.showResult,
-
-
-
-                          showAnswerKey: exam.showAnswerKey,
-
-
-
-                          minTimeMinutes: exam.minTimeMinutes,
-
-
-
-                          maxViolations: exam.maxViolations,
-
-
-
-                          isPublished: exam.isPublished,
-
-
-
-                          requireKioskBrowser: exam.requireKioskBrowser,
-
-
-
-                          groupIds: exam.examGroups?.map((eg: any) => eg.groupId) || [],
-                          groupsData: (() => {
-                            const map: Record<string, any> = {};
-                            exam.examGroups?.forEach((eg: any) => {
-                              map[eg.groupId] = {
-                                sessionName: eg.sessionName || "",
-                                room: eg.room || "",
-                                startTime: toLocalDatetimeString(eg.startTime),
-                                endTime: toLocalDatetimeString(eg.endTime),
-                              };
-                            });
-                            return map;
-                          })(),
-                        });
-                        setShowEditModal(true);
-
-
-
-                      }}
-
-
-
-                      className="p-1 text-slate-500 dark:text-slate-400 hover:text-blue-400 rounded transition"
-
-
-
-                      title="Edit Pengaturan Ujian"
-
-
-
-                    >
-
-
-
-                      <Edit2 className="w-4 h-4" />
-
-
-
-                    </button>
-
-
-
-                    <button
-
-                      onClick={() => handleOpenCloneModal(exam)}
-
-                      className="p-1 text-slate-500 dark:text-slate-400 hover:text-emerald-600 rounded transition"
-
-                      title="Kloning / Duplikasi Ujian (Remedial / Susulan)"
-
-                    >
-
-                      <Copy className="w-4 h-4" />
-
-                    </button>
-
-                    <button
-
-
-
-                      onClick={() => handleDeleteExam(exam.id, exam.title)}
-
-
-
-                      className="p-1 text-slate-500 dark:text-slate-400 hover:text-rose-400 rounded transition"
-
-
-
-                      title="Hapus Ujian"
-
-
-
-                    >
-
-
-
-                      <Trash2 className="w-4 h-4" />
-
-
-
-                    </button>
-
-
-
-                  </div>
-
-
-
-                </div>
-
-
-
-
-
-
-
-                <div className="text-[11px] font-mono text-black font-bold mb-1">Kode: {exam.code}</div>
-
-
-
-                <p className="text-xs text-black font-medium line-clamp-2">{exam.description || "Tanpa deskripsi"}</p>
-
-
-
-
-
-
-
-                {(exam.startTime || exam.endTime) && (
-
-
-
-                  <div className="mt-2.5 px-3 py-2 rounded-xl bg-sky-50 dark:bg-sky-100/70 border border-slate-200 dark:border-sky-200 text-[11px] space-y-1">
-
-
-
-                    {exam.startTime && (
-
-
-
-                      <div className="flex items-center justify-between text-slate-600 dark:text-slate-800">
-
-
-
-                        <span className="font-semibold flex items-center gap-1">
-
-
-
-                          <Calendar className="w-3 h-3 text-blue-600" />
-
-
-
-                          Hari & Tanggal:
-
-
-
+                      {/* Grade Badge */}
+                      {grade && (
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                          Kelas {grade}
                         </span>
+                      )}
 
-
-
-                        <span className="text-slate-900 dark:text-black font-bold">
-
-
-
-                          {new Intl.DateTimeFormat("id-ID", {
-
-
-
-                            timeZone: "Asia/Jakarta",
-
-
-
-                            weekday: "short",
-
-
-
-                            day: "2-digit",
-
-
-
-                            month: "short",
-
-
-
-                            year: "numeric",
-
-
-
-                          }).format(new Date(exam.startTime))}
-
-
-
+                      {/* Category Badge */}
+                      {exam.category === "PKL" ? (
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                          PKL
                         </span>
-
-
-
-                      </div>
-
-
-
-                    )}
-
-
-
-                    <div className="flex items-center justify-between text-slate-600 dark:text-slate-800">
-
-
-
-                      <span className="font-semibold flex items-center gap-1">
-
-
-
-                        <Clock className="w-3 h-3 text-amber-600" />
-
-
-
-                        Waktu (WIB):
-
-
-
-                      </span>
-
-
-
-                      <span className="text-slate-900 dark:text-black font-mono font-black">
-
-
-
-                        {exam.startTime ? new Intl.DateTimeFormat("id-ID", {
-
-
-
-                          timeZone: "Asia/Jakarta",
-
-
-
-                          hour: "2-digit",
-
-
-
-                          minute: "2-digit",
-
-
-
-                        }).format(new Date(exam.startTime)) : "--:--"}
-
-
-
-                        {" - "}
-
-
-
-                        {exam.endTime ? new Intl.DateTimeFormat("id-ID", {
-
-
-
-                          timeZone: "Asia/Jakarta",
-
-
-
-                          hour: "2-digit",
-
-
-
-                          minute: "2-digit",
-
-
-
-                        }).format(new Date(exam.endTime)) + " WIB" : "Selesai"}
-
-
-
-                      </span>
-
-
-
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                          Reguler
+                        </span>
+                      )}
                     </div>
 
+                    {/* Right: Token Pill & Action Buttons */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div
+                        className="flex items-center gap-1 font-mono text-xs px-2.5 py-1 bg-sky-50 border border-sky-200 rounded-lg text-sky-900 font-bold"
+                        title="Token Ujian"
+                      >
+                        <Key className="w-3 h-3 text-sky-600" />
+                        <span>{exam.token || "NO TOKEN"}</span>
+                      </div>
 
+                      <div className="flex items-center gap-0.5 ml-0.5">
+                        <button
+                          onClick={() => {
+                            setEditForm({
+                              id: exam.id,
+                              title: exam.title,
+                              code: exam.code,
+                              description: exam.description || "",
+                              subjectId: exam.subjectId,
+                              category: exam.category || "REGULER",
+                              disableAntiCheat: Boolean(exam.disableAntiCheat),
+                              durationMinutes: exam.durationMinutes,
+                              startTime: toLocalDatetimeString(exam.startTime),
+                              endTime: toLocalDatetimeString(exam.endTime),
+                              token: exam.token || "ZYACBT",
+                              isTokenDynamic: exam.isTokenDynamic,
+                              shuffleQuestions: exam.shuffleQuestions,
+                              shuffleOptions: exam.shuffleOptions,
+                              showResult: exam.showResult,
+                              showAnswerKey: exam.showAnswerKey,
+                              minTimeMinutes: exam.minTimeMinutes,
+                              maxViolations: exam.maxViolations,
+                              isPublished: exam.isPublished,
+                              requireKioskBrowser: exam.requireKioskBrowser,
+                              groupIds: exam.examGroups?.map((eg: any) => eg.groupId) || [],
+                              groupsData: (() => {
+                                const map: Record<string, any> = {};
+                                exam.examGroups?.forEach((eg: any) => {
+                                  map[eg.groupId] = {
+                                    sessionName: eg.sessionName || "",
+                                    room: eg.room || "",
+                                    startTime: toLocalDatetimeString(eg.startTime),
+                                    endTime: toLocalDatetimeString(eg.endTime),
+                                  };
+                                });
+                                return map;
+                              })(),
+                            });
+                            setShowEditModal(true);
+                          }}
+                          className="p-1 text-slate-400 hover:text-blue-600 rounded hover:bg-slate-100 transition"
+                          title="Edit Pengaturan Ujian"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
 
+                        <button
+                          onClick={() => handleOpenCloneModal(exam)}
+                          className="p-1 text-slate-400 hover:text-emerald-600 rounded hover:bg-slate-100 transition"
+                          title="Kloning / Duplikasi Ujian"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          onClick={() => handleDeleteExam(exam.id, exam.title)}
+                          className="p-1 text-slate-400 hover:text-rose-600 rounded hover:bg-slate-100 transition"
+                          title="Hapus Ujian"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
-
-
-                )}
-
-
-
-
-
-
-
-                <div className="mt-4 pt-4 border-t border-sky-300/80 grid grid-cols-3 gap-2 text-center text-xs">
-
-
-
-                  <div className="p-2 rounded-xl bg-sky-100 border border-sky-200 shadow-2xs">
-
-
-
-                    <div className="text-black font-bold text-[10px]">Durasi</div>
-
-
-
-                    <div className="font-black text-black mt-0.5">{exam.durationMinutes}m</div>
-
-
-
+                  {/* Main Title: Clean, Large, Bold, No Redundancy */}
+                  <div className="mb-2.5">
+                    <h3 className="text-base font-extrabold text-slate-900 leading-snug line-clamp-2" title={exam.title}>
+                      {exam.title}
+                    </h3>
+                    <div className="text-[11px] font-mono text-slate-400 mt-0.5">
+                      Kode: {exam.code}
+                    </div>
                   </div>
 
+                  {/* Schedule & Duration: Compact Single Line */}
+                  {(exam.startTime || exam.endTime) ? (
+                    <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-3 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200/70">
+                      <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                      <span className="font-medium">
+                        {exam.startTime
+                          ? new Intl.DateTimeFormat("id-ID", {
+                              timeZone: "Asia/Jakarta",
+                              weekday: "short",
+                              day: "2-digit",
+                              month: "short",
+                            }).format(new Date(exam.startTime)) + " • "
+                          : ""}
+                        {exam.startTime
+                          ? new Intl.DateTimeFormat("id-ID", {
+                              timeZone: "Asia/Jakarta",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }).format(new Date(exam.startTime))
+                          : "--:--"}
+                        {" - "}
+                        {exam.endTime
+                          ? new Intl.DateTimeFormat("id-ID", {
+                              timeZone: "Asia/Jakarta",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }).format(new Date(exam.endTime)) + " WIB"
+                          : "Selesai"}
+                      </span>
+                      <span className="text-slate-300 mx-0.5">•</span>
+                      <span className="font-bold text-slate-700">{exam.durationMinutes}m</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-3 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200/70">
+                      <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="font-medium">Durasi Pengerjaan:</span>
+                      <span className="font-bold text-slate-700">{exam.durationMinutes} Menit</span>
+                    </div>
+                  )}
 
-
-                  <div className="p-2 rounded-xl bg-sky-100 border border-sky-200 shadow-2xs">
-
-
-
-                    <div className="text-black font-bold text-[10px]">Total Soal</div>
-
-
-
-                    <div className="font-black text-black mt-0.5">{exam._count?.examQuestions || 0}</div>
-
-
-
+                  {/* Metrics Bar: Compact & To The Point */}
+                  <div className="flex items-center gap-4 text-xs text-slate-600 py-2 border-t border-slate-100">
+                    <div className="flex items-center gap-1.5">
+                      <FileQuestion className="w-3.5 h-3.5 text-blue-500" />
+                      <span><strong className="text-slate-900 font-bold">{exam._count?.examQuestions || 0}</strong> Soal</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-emerald-500" />
+                      <span><strong className="text-slate-900 font-bold">{exam._count?.examSessions || 0}</strong> Peserta</span>
+                    </div>
+                    {exam.disableAntiCheat && (
+                      <div className="ml-auto text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                        🛡️ Bebas Pelanggaran
+                      </div>
+                    )}
                   </div>
-
-
-
-                  <div className="p-2 rounded-xl bg-sky-100 border border-sky-200 shadow-2xs">
-
-
-
-                    <div className="text-black font-bold text-[10px]">Peserta</div>
-
-
-
-                    <div className="font-black text-black mt-0.5">{exam._count?.examSessions || 0}</div>
-
-
-
-                  </div>
-
-
-
                 </div>
 
+                {/* Footer Buttons: Clean & Focused on Proctoring */}
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-2">
+                  <button
+                    onClick={() => router.push(`/admin/exams/${exam.id}/proctor`)}
+                    className="btn-primary flex-1 justify-center py-2 text-xs font-bold gap-2 shadow-xs"
+                  >
+                    <Activity className="w-3.5 h-3.5" />
+                    <span>Masuk Proctoring</span>
+                  </button>
 
+                  <button
+                    onClick={() => router.push(`/admin/exams/${exam.id}/analysis`)}
+                    className="btn-default py-2 px-3 text-xs font-semibold hover:border-blue-400"
+                    title="Analisis Butir Soal"
+                  >
+                    <BarChart3 className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Analisis</span>
+                  </button>
 
+                  <button
+                    onClick={() => handlePrewarm(exam.id)}
+                    disabled={prewarmingId === exam.id}
+                    className="btn-default py-2 px-3 text-xs font-semibold hover:border-amber-400"
+                    title="Pre-warm Cache Redis (Cegah Lonjakan Beban)"
+                  >
+                    <Zap className={`w-3.5 h-3.5 text-amber-600 ${prewarmingId === exam.id ? "animate-spin" : ""}`} />
+                    <span>{prewarmingId === exam.id ? "..." : "Warm"}</span>
+                  </button>
+                </div>
               </div>
-
-
-
-
-
-
-
-              <div className="mt-5 pt-4 border-t border-sky-300/80 flex items-center gap-2">
-
-
-
-                <button
-
-
-
-                  onClick={() => router.push(`/admin/exams/${exam.id}/proctor`)}
-
-
-
-                  className="btn-primary flex-1 justify-center py-2"
-
-
-
-                >
-
-
-
-                  <Activity className="w-3.5 h-3.5 text-black" />
-
-
-
-                  <span>Proctoring</span>
-
-
-
-                </button>
-
-
-
-
-
-
-
-                <button
-
-
-
-                  onClick={() => router.push(`/admin/exams/${exam.id}/analysis`)}
-
-
-
-                  className="btn-default py-2"
-
-
-
-                  title="Analisis Butir Soal (Psikometri & Daya Beda)"
-
-
-
-                >
-
-
-
-                  <BarChart3 className="w-3.5 h-3.5 text-black" />
-
-
-
-                  <span>Analisis</span>
-
-
-
-                </button>
-
-
-
-
-
-
-
-                <button
-
-
-
-                  onClick={() => handlePrewarm(exam.id)}
-
-
-
-                  disabled={prewarmingId === exam.id}
-
-
-
-                  className="btn-default py-2 hover:border-amber-400"
-
-
-
-                  title="Pre-warm Cache Redis (Cegah Thundering Herd saat Siswa Mulai Ujian)"
-
-
-
-                >
-
-
-
-                  <Zap className={`w-3.5 h-3.5 text-amber-600 ${prewarmingId === exam.id ? "animate-spin" : ""}`} />
-
-
-
-                  <span className="text-black font-bold">{prewarmingId === exam.id ? "Warming..." : "Pre-warm"}</span>
-
-
-
-                </button>
-
-
-
-              </div>
-
-
-
-            </div>
-
-
-
             );
-
-
-
           })}
 
 
