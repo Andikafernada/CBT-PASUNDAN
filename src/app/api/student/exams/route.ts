@@ -9,7 +9,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const isSuperReviewer = user.username === "andikafernanda";
+    const isSuperReviewer = user.username === "andikafernanda" || user.role === "ADMIN" || Boolean(user.name?.toLowerCase().includes("super siswa"));
 
     // Determine if student is in PKL group (via isPkl flag, bypassExambro, or group name/code)
     let isStudentPkl = false;

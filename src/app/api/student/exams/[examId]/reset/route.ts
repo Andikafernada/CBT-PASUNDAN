@@ -12,7 +12,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const isSuperReviewer = user.username === "andikafernanda";
+    const isSuperReviewer = user.username === "andikafernanda" || user.role === "ADMIN" || Boolean(user.name?.toLowerCase().includes("super siswa"));
     if (!isSuperReviewer) {
       return NextResponse.json(
         { error: "Akses ditolak: Fitur reset sesi hanya tersedia untuk akun Super Reviewer." },

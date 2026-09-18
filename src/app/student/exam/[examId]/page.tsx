@@ -180,7 +180,7 @@ export default function ExamRoomPage({
 
   const [session, setSession] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const isSuperReviewer = currentUser?.username === "andikafernanda" || session?.studentUsername === "andikafernanda";
+  const isSuperReviewer = currentUser?.username === "andikafernanda" || session?.studentUsername === "andikafernanda" || currentUser?.role === "ADMIN" || Boolean(currentUser?.name?.toLowerCase().includes("super siswa"));
   const cleanStudentName = (session?.studentName || currentUser?.name || "Peserta CBT").replace(/\s*\(Super Siswa[^\)]*\)/i, "").trim();
   const studentGroup = session?.studentGroup || (isSuperReviewer ? "Super Siswa" : (currentUser?.group?.name || "Siswa"));
   const studentNis = session?.studentNis || currentUser?.nis || session?.studentUsername || currentUser?.username || "-";
@@ -3525,6 +3525,20 @@ export default function ExamRoomPage({
               <span>{formatTime(remainingSeconds)}</span>
             </div>
 
+            {/* Quick Submit QC Button (Khusus Super Siswa / Reviewer) */}
+            {isSuperReviewer && (
+              <button
+                type="button"
+                onClick={() => setShowFinishModal(true)}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-md shadow-purple-600/20 transition cursor-pointer active:scale-95 animate-in fade-in"
+                title="Selesaikan Ujian Langsung untuk QC Cepat"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+                <span className="hidden sm:inline">Submit QC</span>
+                <span className="sm:hidden">QC</span>
+              </button>
+            )}
+
             {/* Theme & Fullscreen (Desktop only) */}
             <div className="hidden lg:flex items-center gap-1">
               <ThemeToggle />
@@ -5624,7 +5638,7 @@ export default function ExamRoomPage({
 
 
 
-              const isLockedEarly = examDuration > 10 && remainingSeconds > 600;
+              const isLockedEarly = !isSuperReviewer && examDuration > 10 && remainingSeconds > 600;
 
 
 
@@ -5876,7 +5890,7 @@ export default function ExamRoomPage({
 
 
 
-              const isLockedEarly = examDuration > 10 && remainingSeconds > 600;
+              const isLockedEarly = !isSuperReviewer && examDuration > 10 && remainingSeconds > 600;
 
 
 
@@ -6124,19 +6138,22 @@ export default function ExamRoomPage({
 
 
 
-                  <div className="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed flex items-center gap-2">
-
-
-
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-
-
-
-                    <span>Waktu pengerjaan telah memasuki 10 menit terakhir. Anda diperkenankan menyelesaikan ujian.</span>
-
-
-
-                  </div>
+                  {isSuperReviewer ? (
+                    <div className="mb-4 p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/80 text-xs text-purple-900 dark:text-purple-200 leading-relaxed flex items-center justify-between">
+                      <div className="flex items-center gap-2 font-bold">
+                        <Sparkles className="w-4 h-4 text-purple-600 shrink-0 animate-pulse" />
+                        <span>Mode Super Siswa (QC Cepat) — Bebas submit kapan saja tanpa menunggu batas waktu.</span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-200 dark:bg-purple-900/60 text-purple-900 dark:text-purple-200 font-black shrink-0 ml-2">
+                        QC BYPASS
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span>Waktu pengerjaan telah memenuhi ketentuan. Anda diperkenankan menyelesaikan ujian.</span>
+                    </div>
+                  )}
 
 
 
@@ -6280,7 +6297,7 @@ export default function ExamRoomPage({
 
 
 
-                      disabled={!isAgreedFinish || submitting}
+                      disabled={(!isAgreedFinish && !isSuperReviewer) || submitting}
 
 
 
