@@ -2,30 +2,54 @@
   "name": "Navin CBT - Digital Assessment Platform",
   "short_name": "Navin CBT",
   "description": "Sistem Ujian Berbasis Komputer Modern & Tangguh by Navins Dev",
+  "id": "/",
   "start_url": "/login",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#0f172a",
   "theme_color": "#022978",
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/navin-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/navin-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/navin-icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/navin-icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/navin-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/navin-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/navin-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
+  ],
+  "categories": [
+    "education",
+    "productivity"
   ]
 }
