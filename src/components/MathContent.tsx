@@ -86,8 +86,9 @@ export function MathContent({ content, className = "" }: MathContentProps) {
     <>
       <div
         ref={containerRef}
+        translate="no"
         dangerouslySetInnerHTML={{ __html: formatContent(content) }}
-        className={`leading-relaxed [&_img]:max-h-80 [&_img]:max-w-full [&_img]:rounded-xl [&_img]:border [&_img]:border-slate-200 [&_img]:my-3 [&_img]:block [&_img]:object-contain [&_img]:shadow-md [&_img]:bg-white [&_img]:p-1 [&_img]:transition-all [&_img]:hover:border-blue-400 [&_img]:hover:shadow-lg ${className}`}
+        className={`notranslate leading-relaxed [&_img]:max-h-80 [&_img]:max-w-full [&_img]:rounded-xl [&_img]:border [&_img]:border-slate-200 [&_img]:my-3 [&_img]:block [&_img]:object-contain [&_img]:shadow-md [&_img]:bg-white [&_img]:p-1 [&_img]:transition-all [&_img]:hover:border-blue-400 [&_img]:hover:shadow-lg ${className}`}
       />
 
       {lightboxSrc && (

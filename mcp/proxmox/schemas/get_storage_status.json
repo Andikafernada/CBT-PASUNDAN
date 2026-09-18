@@ -1,0 +1,1 @@
+{"name":"get_storage_status","description":"Melihat kapasitas penyimpanan (storage) Proxmox seperti local, local-lvm, ZFS, atau NFS.","parameters":{"properties":{"node":{"default":"","title":"Node","type":"string"}},"title":"get_storage_statusArguments","type":"object"}}

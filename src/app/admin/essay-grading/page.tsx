@@ -90,7 +90,7 @@ export default function EssayGradingHubPage() {
             Periksa Jawaban Siswa & Validasi Koreksi Esai
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 font-medium max-w-2xl leading-relaxed">
-            Periksa hasil jawaban esai siswa yang telah dikoreksi secara otomatis oleh AI, validasi keakuratan skor, atau berikan nilai dan catatan evaluasi langsung sebagai guru.
+            Periksa hasil jawaban esai siswa yang telah dikoreksi secara otomatis oleh AI (nilai sudah otomatis masuk ke rekap nilai), validasi status resmi guru, atau sesuaikan catatan evaluasi bila diperlukan.
           </p>
         </div>
 
@@ -111,9 +111,9 @@ export default function EssayGradingHubPage() {
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-purple-700">Koreksi AI Perlu Validasi</div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-purple-700">Koreksi AI (Nilai Aktif)</div>
             <div className="text-2xl font-black text-purple-950 mt-0.5">{totalPendingAi}</div>
-            <div className="text-[11px] text-purple-600 font-medium">Jawaban esai siap diverifikasi guru</div>
+            <div className="text-[11px] text-purple-600 font-medium">Nilai AI sudah masuk & siap ditinjau</div>
           </div>
         </div>
 
@@ -212,9 +212,9 @@ export default function EssayGradingHubPage() {
 
                     {hasEssays ? (
                       item.hasPendingValidation ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-200 flex items-center gap-1 animate-pulse">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-200 flex items-center gap-1">
                           <Sparkles className="w-3 h-3 text-purple-700" />
-                          <span>Perlu Validasi</span>
+                          <span>Dinilai AI (Aktif)</span>
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200 flex items-center gap-1">

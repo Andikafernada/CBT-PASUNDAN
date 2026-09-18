@@ -14,6 +14,7 @@ export async function GET() {
         username: user.username,
         name: user.name,
         role: user.role,
+        nis: (user as any).nis || user.username,
         group: user.group ? { id: user.group.id, name: user.group.name } : null,
       },
     });

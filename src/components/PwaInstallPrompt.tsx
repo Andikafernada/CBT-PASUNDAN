@@ -58,7 +58,7 @@ export function PwaInstallPrompt() {
     } else {
       // Guide for iOS / Safari / unsupported prompt
       alert(
-        "📱 Panduan Pasang Aplikasi:\n\n1. Ketuk tombol Menu Browser (titik tiga di kanan atas atau ikon Bagikan di Safari).\n2. Pilih 'Tambahkan ke Layar Utama' (Add to Home screen).\n3. Buka CBT HEBAT dari layar utama HP Anda."
+        "📱 Panduan Pasang Aplikasi:\n\n1. Ketuk tombol Menu Browser (titik tiga di kanan atas atau ikon Bagikan di Safari).\n2. Pilih 'Tambahkan ke Layar Utama' (Add to Home screen).\n3. Buka Navin CBT dari layar utama HP Anda."
       );
       setShowPrompt(false);
       sessionStorage.setItem("pwa_prompt_dismissed", "true");
@@ -81,7 +81,7 @@ export function PwaInstallPrompt() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-xs text-slate-900 truncate">
-              Pasang Aplikasi CBT HEBAT
+              Pasang Aplikasi Navin CBT
             </h4>
             <button
               onClick={handleDismiss}

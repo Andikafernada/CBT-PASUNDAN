@@ -1,12 +1,27 @@
 {
-  "name": "CBT HEBAT SMK Pasundan 2 Bandung",
-  "short_name": "ZYACBT",
-  "description": "Sistem Ujian Berbasis Komputer Modern & Tangguh",
+  "name": "Navin CBT - Digital Assessment Platform",
+  "short_name": "Navin CBT",
+  "description": "Sistem Ujian Berbasis Komputer Modern & Tangguh by Navins Dev",
   "start_url": "/login",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#0284c7",
+  "background_color": "#0f172a",
+  "theme_color": "#022978",
   "icons": [
+    {
+      "src": "/navin-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/navin-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/navin-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
     {
       "src": "/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",

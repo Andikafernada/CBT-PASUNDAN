@@ -1,0 +1,1 @@
+{"name":"ruijie_list_projects","description":"Mendapatkan seluruh daftar project jaringan (baik project sendiri maupun project sharing).\n\nMengembalikan ID group, nama project, pemilik akun, serta ringkasan jumlah AP, Switch, dan Gateway\nbeserta status online dan offline-nya.\n","parameters":{"properties":{},"title":"ruijie_list_projectsArguments","type":"object"}}

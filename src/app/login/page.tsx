@@ -2,17 +2,16 @@
 
 import React, { useState } from "react";
 import {
-  GraduationCap,
   Lock,
   User,
   ShieldAlert,
   ArrowRight,
   Loader2,
-  Sparkles,
   Eye,
   EyeOff,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NavinLogo } from "@/components/NavinLogo";
 
 function getOrCreateDeviceFingerprint(): string {
   try {
@@ -87,19 +86,17 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10 animate-fade-up">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="relative">
-            <div className="w-16 h-16 rounded-3xl gradient-brand flex items-center justify-center shadow-glow border border-sky-300">
-              <GraduationCap className="w-9 h-9 text-black" />
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-xl bg-white border border-sky-300 flex items-center justify-center shadow-md">
-              <Sparkles className="w-3.5 h-3.5 text-black" />
-            </div>
+          <div className="mb-2">
+            <NavinLogo variant="icon-only" size="xl" className="shadow-lg rounded-2xl" />
           </div>
-          <h1 className="mt-4 text-2xl font-black text-black tracking-tight">
-            CBT HEBAT
+          <h1 className="text-2xl font-black text-black tracking-tight flex items-center gap-2 mt-1">
+            <span>NAVIN CBT</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-sky-500 text-white shadow-xs">
+              PRO
+            </span>
           </h1>
           <p className="text-xs text-black mt-1 font-bold">
-            SMK PASUNDAN 2 Bandung
+            Digital Assessment Platform &bull; Navins Dev
           </p>
           <p className="text-[11px] text-slate-700 mt-0.5 max-w-xs font-semibold">
             Platform Ujian Berbasis Komputer & Asesmen Terintegrasi
@@ -145,7 +142,7 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-xs font-black text-black mb-1.5">
-                Kata Sandi (Password)
+                Kata Sandi
               </label>
               <div className="relative group">
                 <Lock className="w-4 h-4 text-black absolute left-3.5 top-1/2 -translate-y-1/2 transition" />
@@ -155,13 +152,12 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="form-input pl-10 pr-12"
+                  className="form-input pl-10 pr-10"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-sky-800 transition p-1 cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-black hover:opacity-80 transition cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4 text-black" /> : <Eye className="w-4 h-4 text-black" />}
                 </button>
@@ -191,11 +187,11 @@ export default function LoginPage() {
         {/* Footer info */}
         <div className="flex items-center justify-center gap-2 mt-6 text-xs text-black font-bold">
           <span className="h-px w-8 bg-sky-300" />
-          CBT HEBAT SMK PASUNDAN 2 Bandung
+          <span>Navin CBT Platform</span>
           <span className="h-px w-8 bg-sky-300" />
         </div>
         <div className="text-center mt-1 text-[11px] text-black font-semibold">
-          Development by <span className="font-black text-black">Andika Fernanda</span>
+          &copy; 2026 Navin CBT by <span className="font-black text-black">Navins Dev Digital Solutions</span> &bull; Bandung, Indonesia
         </div>
       </div>
     </div>

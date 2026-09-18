@@ -1,0 +1,1 @@
+{"name":"ruijie_list_ssids","description":"Menampilkan daftar nama SSID Wi-Fi yang aktif pada project.\n\nArgs:\n    group_id: ID grup/project (opsional).\n","parameters":{"properties":{"group_id":{"anyOf":[{"type":"integer"},{"type":"null"}],"default":null,"title":"Group Id"}},"title":"ruijie_list_ssidsArguments","type":"object"}}

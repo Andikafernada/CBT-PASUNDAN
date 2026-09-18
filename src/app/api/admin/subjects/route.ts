@@ -11,6 +11,9 @@ export async function GET() {
 
     const subjects = await prisma.subject.findMany({
       include: {
+        _count: {
+          select: { questions: true },
+        },
         topics: {
           include: {
             _count: { select: { questions: true } },

@@ -1,0 +1,7 @@
+{
+  "host": "172.16.0.211",
+  "port": 3306,
+  "user": "cbtuser",
+  "password": "cbtpassword2026",
+  "database": "zyacbt_modern"
+}

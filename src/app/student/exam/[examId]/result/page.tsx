@@ -265,9 +265,9 @@ export default function ExamResultPage({
 
         {/* Footer Branding */}
         <div className="text-center pt-2 text-xs text-black font-semibold">
-          <div className="font-bold text-black">CBT HEBAT SMK PASUNDAN 2 Bandung</div>
+          <div className="font-bold text-black">Navin CBT &bull; Digital Assessment Platform</div>
           <div className="text-[11px] text-black mt-0.5">
-            Development by <span className="font-black text-black">Andika Fernanda</span>
+            &copy; 2026 Navin CBT by <span className="font-black text-black">Navins Dev</span> &bull; Bandung, Indonesia
           </div>
         </div>
       </div>

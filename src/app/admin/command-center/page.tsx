@@ -264,7 +264,7 @@ export default function CommandCenterPage() {
 • CPU Load: *${t.cpuLoad1m}* | Redis: *HEALTHY*
 • Jaringan LAN 7 Lab: *Normal & Stabil*
 ------------------------------------------------
-_Laporan otomatis dari Pusat Kendali CBT HEBAT_`;
+_Laporan otomatis dari Pusat Kendali Navin CBT_`;
 
     setWaText(text);
     setCopiedWa(false);

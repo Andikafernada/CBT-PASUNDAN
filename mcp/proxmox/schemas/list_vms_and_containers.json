@@ -1,0 +1,1 @@
+{"name":"list_vms_and_containers","description":"Tampilkan semua VM (KVM/QEMU) dan Container (LXC) beserta ID, nama, status (running/stopped), CPU, dan RAM.","parameters":{"properties":{"node":{"default":"","title":"Node","type":"string"}},"title":"list_vms_and_containersArguments","type":"object"}}

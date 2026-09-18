@@ -1,0 +1,1 @@
+{"name":"get_nodes","description":"Ambil daftar node Proxmox beserta status penggunaan CPU, RAM, dan uptime.","parameters":{"properties":{},"title":"get_nodesArguments","type":"object"}}

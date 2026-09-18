@@ -59,10 +59,9 @@ async function gradeWithGemini(
   const preferredModel = process.env.GEMINI_MODEL || "gemini-1.5-flash";
   const candidateModels = [
     preferredModel,
-    "gemini-flash-latest",
-    "gemini-flash-lite-latest",
-    "gemini-3.5-flash",
     "gemini-3.6-flash",
+    "gemini-flash-latest",
+    "gemini-2.5-flash-lite",
   ];
   // Deduplicate candidate models
   const modelsToTry = Array.from(new Set(candidateModels));

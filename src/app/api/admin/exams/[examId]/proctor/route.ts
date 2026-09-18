@@ -476,25 +476,22 @@ export async function POST(
 
 
     if (action === "ADD_TIME") {
-
       const extraSeconds = (Number(additionalMinutes) || 10) * 60;
-
       const sess = await prisma.examSession.findUnique({ where: { id: sessionId } });
-
       if (sess) {
-
+        // 🔒 Shifting startedAt forward by extraSeconds ensures all dynamic elapsed time calculations
+        // (in /status, /save-answer, /save-answer-bulk, /start) naturally retain the extra granted time!
+        const originalStart = sess.startedAt ? new Date(sess.startedAt).getTime() : Date.now();
+        const adjustedStart = new Date(originalStart + extraSeconds * 1000);
         await prisma.examSession.update({
-
           where: { id: sessionId },
-
-          data: { remainingSeconds: sess.remainingSeconds + extraSeconds },
-
+          data: {
+            startedAt: adjustedStart,
+            remainingSeconds: sess.remainingSeconds + extraSeconds,
+          },
         });
-
       }
-
       return NextResponse.json({ success: true, message: `Waktu berhasil ditambahkan ${additionalMinutes || 10} menit` });
-
     }
 
 

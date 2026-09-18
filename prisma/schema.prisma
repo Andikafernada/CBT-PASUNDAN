@@ -31,6 +31,7 @@ model User {
   teacherAssignments TeacherAssignment[]
   createdExams      Exam[]        @relation("ExamCreatedBy")
   createdQuestions  Question[]    @relation("QuestionCreatedBy")
+  learningSurveys   LearningSurvey[]
 }
 
 model AuditLog {
@@ -80,6 +81,7 @@ model Subject {
   exams       Exam[]
   questions   Question[]
   teacherAssignments TeacherAssignment[]
+  learningSurveys    LearningSurvey[]
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 }
@@ -185,6 +187,7 @@ model Exam {
   examGroups            ExamGroup[]
   examQuestions         ExamQuestion[]
   examSessions          ExamSession[]
+  learningSurveys       LearningSurvey[]
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
 
@@ -296,4 +299,28 @@ model StudentReflection {
   createdAt     DateTime    @default(now())
 
   @@index([sessionId])
+}
+
+model LearningSurvey {
+  id           String   @id @default(cuid())
+  examId       String
+  subjectId    String
+  userId       String
+  q1           String   // SS, S, N, TS, STS (Guru menguasai materi...)
+  q2           String   // SS, S, N, TS, STS (Guru memberikan contoh-contoh...)
+  q3           String   // SS, S, N, TS, STS (Guru dapat menjelaskan materi...)
+  q4           String   // SS, S, N, TS, STS (Guru memberikan tanggapan...)
+  q5           String   // SS, S, N, TS, STS (Guru mengembalikan tugas...)
+  q6           String   // SS, S, N, TS, STS (Guru memulai & mengakhiri tepat waktu...)
+  q7           String   // SS, S, N, TS, STS (Guru menguasai kelas...)
+  q8Suggestion String?  @db.LongText // Tuliskan Saran pembelajaran...
+  submittedAt  DateTime @default(now())
+
+  exam         Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  subject      Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, userId])
+  @@index([subjectId])
+  @@index([userId])
 }

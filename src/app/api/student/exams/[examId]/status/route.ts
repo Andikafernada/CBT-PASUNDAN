@@ -27,6 +27,7 @@ export async function GET(
         status: true,
         finishReason: true,
         score: true,
+        startedAt: true,
         remainingSeconds: true,
         violationCount: true,
         finishedAt: true,
@@ -34,6 +35,8 @@ export async function GET(
           select: {
             id: true,
             title: true,
+            durationMinutes: true,
+            endTime: true,
             subject: {
               select: {
                 name: true,
@@ -55,6 +58,29 @@ export async function GET(
 
     const isFinished = ["COMPLETED", "FORCE_FINISHED", "TIMEOUT"].includes(session.status);
 
+    // 🔒 Dynamic Authoritative Remaining Seconds Calculation
+    let serverRemainingSeconds = session.remainingSeconds;
+    if (session.status === "IN_PROGRESS" && session.startedAt) {
+      const now = new Date();
+      const elapsedSeconds = Math.floor((now.getTime() - new Date(session.startedAt).getTime()) / 1000);
+      const durationRemaining = Math.max(0, (session.exam.durationMinutes || 60) * 60 - elapsedSeconds);
+
+      let scheduleRemaining = Infinity;
+      if (session.exam.endTime) {
+        scheduleRemaining = Math.max(0, Math.floor((new Date(session.exam.endTime).getTime() - now.getTime()) / 1000));
+      }
+
+      serverRemainingSeconds = Math.min(durationRemaining, scheduleRemaining);
+
+      // Background sync DB if drift is noticeable (> 5s)
+      if (Math.abs(session.remainingSeconds - serverRemainingSeconds) > 5) {
+        prisma.examSession.update({
+          where: { id: session.id },
+          data: { remainingSeconds: serverRemainingSeconds },
+        }).catch(() => {});
+      }
+    }
+
     return NextResponse.json({
       success: true,
       sessionId: session.id,
@@ -63,7 +89,8 @@ export async function GET(
       isForceFinished,
       isFinished,
       isSuspended: session.status === "SUSPENDED",
-      remainingSeconds: session.remainingSeconds,
+      remainingSeconds: serverRemainingSeconds,
+      serverRemainingSeconds: serverRemainingSeconds,
       score: session.score,
       finishedAt: session.finishedAt,
       examTitle: session.exam?.title || "Ujian",

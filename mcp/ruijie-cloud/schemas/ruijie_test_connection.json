@@ -1,0 +1,1 @@
+{"name":"ruijie_test_connection","description":"Menguji autentikasi dan konektivitas langsung ke platform Ruijie Cloud.\n\nGunakan tool ini untuk memverifikasi apakah akun/kredensial Ruijie Cloud aktif,\ndan apakah project jaringan dapat diakses.\n","parameters":{"properties":{},"title":"ruijie_test_connectionArguments","type":"object"}}

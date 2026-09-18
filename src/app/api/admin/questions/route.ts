@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
         options: { orderBy: { orderIndex: "asc" } },
         matchingPairs: { orderBy: { orderIndex: "asc" } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "asc" },
     });
 
     return NextResponse.json({ questions });
@@ -152,7 +152,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { id, subjectId, content, difficulty, points, options, matchingPairs, rubric } = body;
+    const { id, subjectId, content, difficulty, points, options, matchingPairs, rubric, imageUrl, type } = body;
 
     if (!id || !content) {
       return NextResponse.json({ error: "ID dan konten soal wajib diisi" }, { status: 400 });
@@ -196,6 +196,8 @@ export async function PUT(req: NextRequest) {
       difficulty: difficulty || "MEDIUM",
       points: Number(points) || 1.0,
       rubric: rubric !== undefined ? rubric : undefined,
+      imageUrl: imageUrl !== undefined ? imageUrl : undefined,
+      type: type !== undefined ? type : undefined,
     };
 
     if (subjectId) {

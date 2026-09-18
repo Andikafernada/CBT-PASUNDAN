@@ -1,0 +1,1 @@
+{"name":"audit_exam_file","description":"\nAudit file dokumen soal (.docx) untuk memeriksa jumlah butir soal,\nketersediaan nomor soal, kelengkapan label opsi A-E, dan gambar yang tertanam.\n","parameters":{"properties":{"file_path":{"title":"File Path","type":"string"}},"required":["file_path"],"title":"audit_exam_fileArguments","type":"object"}}

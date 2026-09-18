@@ -118,7 +118,7 @@ function OnboardingModal({ onComplete }: { onComplete: () => void }) {
               <BookOpen className="w-5 h-5 text-black" />
             </div>
             <div>
-              <h2 className="font-black text-black text-lg">Selamat Datang di CBT HEBAT SMK PASUNDAN 2 Bandung</h2>
+              <h2 className="font-black text-black text-lg">Selamat Datang di Navin CBT</h2>
               <p className="text-xs text-black font-semibold">Lengkapi data ampuan Anda sebelum memulai</p>
             </div>
           </div>
@@ -561,8 +561,8 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="pt-6 border-t border-sky-300 flex flex-col sm:flex-row items-center justify-between text-xs text-black font-bold gap-2">
-          <span>CBT HEBAT SMK PASUNDAN 2 Bandung &bull; Sistem Asesmen Berbasis Komputer Modern</span>
-          <span>Development by <strong className="text-black font-black">Andika Fernanda</strong></span>
+          <span>Navin CBT Platform &bull; Sistem Asesmen Berbasis Komputer Modern</span>
+          <span>Developed by <strong className="text-black font-black">Navins Dev Digital Solutions</strong> &bull; Bandung, Indonesia</span>
         </div>
       </div>
     </>

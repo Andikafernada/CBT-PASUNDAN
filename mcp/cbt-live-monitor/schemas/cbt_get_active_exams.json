@@ -1,0 +1,1 @@
+{"name":"cbt_get_active_exams","description":"\nMengambil daftar ujian CBT yang sedang aktif atau dipublikasikan beserta rekap jumlah peserta live\n(total terdaftar, sedang mengerjakan/in progress, selesai/completed, dan dibekukan/suspended).\n","parameters":{"properties":{},"title":"cbt_get_active_examsArguments","type":"object"}}

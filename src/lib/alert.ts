@@ -48,7 +48,7 @@ export async function sendSystemAlert(payload: AlertPayload): Promise<{ success:
   }
 
   try {
-    let text = `${emoji} *[CBT HEBAT ALERT - ${level}]*\n`;
+    let text = `${emoji} *[NAVIN CBT ALERT - ${level}]*\n`;
     text += `*${title}*\n`;
     text += `${message}\n\n`;
     text += `🕒 _Waktu_: ${timestampStr} WIB\n`;

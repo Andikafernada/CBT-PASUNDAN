@@ -1,0 +1,1 @@
+{"name":"start_vm","description":"Menyalakan VM atau LXC Container berdasarkan VMID (contoh: 100, 101).","parameters":{"properties":{"vmid":{"title":"Vmid","type":"integer"}},"required":["vmid"],"title":"start_vmArguments","type":"object"}}

@@ -33,17 +33,27 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 export const ExamLocalDB = {
-  // 1. Cache full exam structure (questions, options, media, instructions)
-  async saveExamCache(examId: string, payload: any): Promise<void> {
+  // 1. Cache full exam structure with persistent targetEndTime
+  async saveExamCache(examId: string, payload: any, targetEndTime?: number): Promise<void> {
     try {
+      const calculatedEnd = targetEndTime || (typeof payload?.exam?.remainingSeconds === "number" ? Date.now() + payload.exam.remainingSeconds * 1000 : undefined);
+      
       const db = await openDB();
       const tx = db.transaction("exam_cache", "readwrite");
       const store = tx.objectStore("exam_cache");
       store.put({
         examId,
         cachedAt: Date.now(),
+        targetEndTime: calculatedEnd,
         payload,
       });
+
+      if (calculatedEnd) {
+        try {
+          localStorage.setItem(`cbt_target_end_${examId}`, String(calculatedEnd));
+        } catch {}
+      }
+
       return new Promise((resolve) => {
         tx.oncomplete = () => resolve();
       });
@@ -51,16 +61,22 @@ export const ExamLocalDB = {
       // Fallback to localStorage
       try {
         localStorage.setItem(`cbt_cache_${examId}`, JSON.stringify(payload));
+        if (targetEndTime) {
+          localStorage.setItem(`cbt_target_end_${examId}`, String(targetEndTime));
+        }
       } catch {}
     }
   },
 
-  // ⚡ Live Answer Cache Update: keeps exam_cache updated with all answers selected
-  async updateCachedQuestions(examId: string, updatedQuestions: any[]): Promise<void> {
+  // ⚡ Live Answer Cache Update: keeps exam_cache updated with all answers selected & targetEndTime
+  async updateCachedQuestions(examId: string, updatedQuestions: any[], targetEndTime?: number): Promise<void> {
     try {
       // Always update localStorage fast backup first
       try {
         localStorage.setItem(`cbt_backup_${examId}`, JSON.stringify(updatedQuestions));
+        if (targetEndTime) {
+          localStorage.setItem(`cbt_target_end_${examId}`, String(targetEndTime));
+        }
       } catch {}
 
       const db = await openDB();
@@ -72,6 +88,9 @@ export const ExamLocalDB = {
         if (req.result && req.result.payload) {
           req.result.payload.questions = updatedQuestions;
           req.result.updatedAt = Date.now();
+          if (targetEndTime) {
+            req.result.targetEndTime = targetEndTime;
+          }
           store.put(req.result);
         }
       };
@@ -80,6 +99,7 @@ export const ExamLocalDB = {
 
   async getExamCache(examId: string): Promise<any | null> {
     let payload: any = null;
+    let targetEndTime: number | undefined;
 
     try {
       const db = await openDB();
@@ -87,17 +107,34 @@ export const ExamLocalDB = {
       const store = tx.objectStore("exam_cache");
       const req = store.get(examId);
 
-      payload = await new Promise((resolve) => {
-        req.onsuccess = () => {
-          resolve(req.result ? req.result.payload : null);
-        };
+      const record: any = await new Promise((resolve) => {
+        req.onsuccess = () => resolve(req.result || null);
         req.onerror = () => resolve(null);
       });
+      if (record) {
+        payload = record.payload;
+        targetEndTime = record.targetEndTime;
+      }
     } catch {
       try {
         const raw = localStorage.getItem(`cbt_cache_${examId}`);
         payload = raw ? JSON.parse(raw) : null;
       } catch {}
+    }
+
+    // Also check localStorage target end time
+    if (!targetEndTime) {
+      try {
+        const storedEnd = localStorage.getItem(`cbt_target_end_${examId}`);
+        if (storedEnd) targetEndTime = Number(storedEnd);
+      } catch {}
+    }
+
+    // 🔒 Dynamic offline remaining time adjustment:
+    // If targetEndTime exists, calculate true remaining seconds rather than using static initial time!
+    if (payload && payload.exam && targetEndTime && targetEndTime > Date.now()) {
+      const realRemaining = Math.max(0, Math.round((targetEndTime - Date.now()) / 1000));
+      payload.exam.remainingSeconds = realRemaining;
     }
 
     // Smart Merge with localStorage backup if questions have newer answers
@@ -285,6 +322,7 @@ export const ExamLocalDB = {
       localStorage.removeItem(`cbt_cache_${examId}`);
       localStorage.removeItem(`cbt_queue_${examId}`);
       localStorage.removeItem(`cbt_backup_${examId}`);
+      localStorage.removeItem(`cbt_target_end_${examId}`);
     } catch {}
   },
 };
