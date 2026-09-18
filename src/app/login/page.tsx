@@ -1,5 +1,6 @@
 "use client";
 
+import { PwaInstallButton } from "@/components/PwaInstallPrompt";
 import React, { useState } from "react";
 import {
   Lock,
@@ -182,6 +183,11 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* Tombol Pasang PWA Tanpa Pop-up Mengambang */}
+          <div className="mt-4 pt-3.5 border-t border-sky-200/80">
+            <PwaInstallButton />
+          </div>
         </div>
 
         {/* Footer info */}

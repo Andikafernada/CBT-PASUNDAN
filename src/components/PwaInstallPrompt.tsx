@@ -3,114 +3,132 @@
 import React, { useEffect, useState } from "react";
 import { Download, Smartphone, X, CheckCircle2 } from "lucide-react";
 
-export function PwaInstallPrompt() {
+export function PwaInstallButton({
+  className = "",
+  variant = "default",
+}: {
+  className?: string;
+  variant?: "default" | "compact" | "icon";
+}) {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [showIosGuide, setShowIosGuide] = useState(false);
 
   useEffect(() => {
-    // 1. Check if already standalone
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone === true;
+    // Check if already running in standalone mode (installed)
+    const standalone =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as any).standalone === true);
 
-    if (isStandalone) {
-      setIsInstalled(true);
-      return;
-    }
+    setIsStandalone(Boolean(standalone));
 
-    // 2. Check if user dismissed it in this session
-    const dismissed = sessionStorage.getItem("pwa_prompt_dismissed");
-    if (dismissed) return;
-
-    // 3. Listen for beforeinstallprompt
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowPrompt(true);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
 
-    // Fallback: If on mobile and prompt hasn't fired after 2 seconds, show helper prompt
-    const timer = setTimeout(() => {
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      if (isMobile && !isStandalone && !sessionStorage.getItem("pwa_prompt_dismissed")) {
-        setShowPrompt(true);
-      }
-    }, 2500);
-
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
-      clearTimeout(timer);
     };
   }, []);
 
-  const handleInstallClick = async () => {
+  // If already installed standalone, don't show the button
+  if (isStandalone) return null;
+
+  const handleInstall = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       if (choice.outcome === "accepted") {
-        setIsInstalled(true);
-        setShowPrompt(false);
+        setIsStandalone(true);
       }
       setDeferredPrompt(null);
     } else {
-      // Guide for iOS / Safari / unsupported prompt
-      alert(
-        "📱 Panduan Pasang Aplikasi:\n\n1. Ketuk tombol Menu Browser (titik tiga di kanan atas atau ikon Bagikan di Safari).\n2. Pilih 'Tambahkan ke Layar Utama' (Add to Home screen).\n3. Buka Navin CBT dari layar utama HP Anda."
-      );
-      setShowPrompt(false);
-      sessionStorage.setItem("pwa_prompt_dismissed", "true");
+      // If iOS or unsupported native prompt
+      const isIos = typeof navigator !== "undefined" && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isIos) {
+        setShowIosGuide(true);
+      } else {
+        alert(
+          "📱 Pasang Aplikasi Navin CBT:\n\n" +
+          "1. Buka Menu Browser (titik tiga di kanan atas atau ikon menu).\n" +
+          "2. Pilih 'Tambahkan ke Layar Utama' (Add to Home screen) atau 'Pasang Aplikasi'.\n" +
+          "3. Aplikasi Navin CBT akan langsung terpasang di layar perangkat Anda."
+        );
+      }
     }
   };
 
-  const handleDismiss = () => {
-    setShowPrompt(false);
-    sessionStorage.setItem("pwa_prompt_dismissed", "true");
-  };
-
-  if (!showPrompt || isInstalled) return null;
-
   return (
-    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
-      <div className="bg-white border border-slate-200 shadow-xl rounded-2xl p-4 flex items-start gap-3.5 text-slate-800">
-        <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-md">
-          <Smartphone className="w-5 h-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <h4 className="font-bold text-xs text-slate-900 truncate">
-              Pasang Aplikasi Navin CBT
-            </h4>
+    <>
+      {variant === "compact" ? (
+        <button
+          onClick={handleInstall}
+          type="button"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-sky-300 hover:bg-sky-50 text-sky-950 text-xs font-bold transition shadow-xs cursor-pointer ${className}`}
+          title="Pasang Aplikasi Navin CBT di Perangkat (Layar Penuh)"
+        >
+          <Smartphone className="w-3.5 h-3.5 text-blue-600" />
+          <span>Pasang App</span>
+        </button>
+      ) : variant === "icon" ? (
+        <button
+          onClick={handleInstall}
+          type="button"
+          className={`p-2 rounded-xl bg-white border border-sky-300 text-blue-600 hover:bg-sky-50 transition cursor-pointer shadow-xs ${className}`}
+          title="Pasang Aplikasi Navin CBT"
+        >
+          <Smartphone className="w-4 h-4" />
+        </button>
+      ) : (
+        <button
+          onClick={handleInstall}
+          type="button"
+          className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-sky-300 bg-white/90 hover:bg-white text-sky-950 text-xs font-bold transition shadow-xs cursor-pointer ${className}`}
+        >
+          <Smartphone className="w-4 h-4 text-blue-600" />
+          <span>Pasang Aplikasi di HP / Laptop (PWA)</span>
+        </button>
+      )}
+
+      {/* iOS Modal Guide */}
+      {showIosGuide && (
+        <div className="fixed inset-0 bg-sky-950/30 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 animate-in zoom-in-95">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-blue-600" />
+                Pasang di iPhone / iPad
+              </h4>
+              <button
+                onClick={() => setShowIosGuide(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <ol className="text-xs text-slate-700 space-y-2 list-decimal list-inside leading-relaxed mb-4">
+              <li>Ketuk ikon <strong>Bagikan (Share)</strong> di bilah bawah peramban Safari.</li>
+              <li>Gulir ke bawah dan pilih <strong>"Tambah ke Layar Utama" (Add to Home Screen)</strong>.</li>
+              <li>Ketuk <strong>Tambah (Add)</strong> di pojok kanan atas.</li>
+            </ol>
             <button
-              onClick={handleDismiss}
-              className="text-slate-400 hover:text-slate-600 p-0.5 rounded-lg transition"
-              title="Tutup"
+              onClick={() => setShowIosGuide(false)}
+              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              Mengerti
             </button>
           </div>
-          <p className="text-[11px] text-slate-600 mt-1 leading-snug">
-            Pasang di HP/Laptop agar ujian berjalan <strong>satu layar penuh</strong> tanpa gangguan tab & notifikasi browser.
-          </p>
-          <div className="flex items-center gap-2 mt-2.5">
-            <button
-              onClick={handleInstallClick}
-              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Pasang Sekarang</span>
-            </button>
-            <button
-              onClick={handleDismiss}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition cursor-pointer"
-            >
-              Nanti Saja
-            </button>
-          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
+}
+
+// Kembalikan null agar tidak ada pop-up mengambang otomatis yang mengganggu
+export function PwaInstallPrompt() {
+  return null;
 }

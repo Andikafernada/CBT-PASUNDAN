@@ -1,7 +1,6 @@
 "use client";
 
-
-
+import { PwaInstallButton } from "@/components/PwaInstallPrompt";
 import React, { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
@@ -339,6 +338,7 @@ export default function StudentDashboardPage() {
 
           {/* Right: Theme & Logout */}
           <div className="flex items-center gap-2 flex-shrink-0">
+            <PwaInstallButton variant="compact" />
             <ThemeToggle />
             <button
               onClick={handleLogout}
@@ -881,4 +881,3 @@ export default function StudentDashboardPage() {
   );
 
 }
-
