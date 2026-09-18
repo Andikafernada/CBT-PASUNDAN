@@ -157,6 +157,9 @@ export async function GET() {
 
       const sessionStatus = session?.status || null;
 
+      const isShowResult = isSuperReviewer ? true : Boolean(exam.showResult);
+      const studentScore = isShowResult ? (session?.score ?? null) : null;
+
       return {
         id: exam.id,
         code: exam.code,
@@ -177,12 +180,13 @@ export async function GET() {
         scheduleStatus,
         status: scheduleStatus,
         sessionStatus,
-        score: session?.score ?? null,
+        showResult: isShowResult,
+        score: studentScore,
         session: session
           ? {
               id: session.id,
               status: session.status,
-              score: session.score,
+              score: studentScore,
               startedAt: session.startedAt,
               finishedAt: session.finishedAt,
               remainingSeconds: session.remainingSeconds,

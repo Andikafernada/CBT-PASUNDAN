@@ -572,8 +572,8 @@ export default function StudentDashboardPage() {
                       </div>
                     </div>
 
-                    {/* Perolehan Nilai jika sudah selesai */}
-                    {isFinished && score !== null && score !== undefined && (
+                    {/* Perolehan Nilai jika sudah selesai dan diizinkan tampil */}
+                    {isFinished && (isSuperReviewer || item.showResult) && score !== null && score !== undefined && (
                       <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 mt-1">
                         <span className="text-xs font-bold flex items-center gap-1.5">
                           <Award className="w-3.5 h-3.5 text-emerald-600" />

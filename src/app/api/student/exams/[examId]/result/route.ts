@@ -77,21 +77,23 @@ export async function GET(
       }
     }
 
+    const isShowResult = isSuperReviewer ? true : Boolean(exam.showResult);
+
     return NextResponse.json({
       success: true,
       examId: exam.id,
       title: exam.title,
       subject: exam.subject?.name || "Mata Pelajaran",
       durationMinutes: exam.durationMinutes,
-      showResult: isSuperReviewer ? true : exam.showResult,
-      score: session.score ?? 0,
+      showResult: isShowResult,
+      score: isShowResult ? (session.score ?? 0) : null,
       status: session.status,
       startedAt: session.startedAt,
       finishedAt: session.finishedAt,
       totalQuestions,
-      correctCount,
-      incorrectCount,
-      essayAnswers,
+      correctCount: isShowResult ? correctCount : null,
+      incorrectCount: isShowResult ? incorrectCount : null,
+      essayAnswers: isShowResult ? essayAnswers : [],
       isSuperReviewer,
     });
   } catch (error: any) {
