@@ -1,1 +1,0 @@
-{"name":"test_connection","description":"Tes koneksi ke server Proxmox VE dan ambil informasi versi.","parameters":{"properties":{},"title":"test_connectionArguments","type":"object"}}

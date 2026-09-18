@@ -1,1 +1,0 @@
-{"name":"stop_vm","description":"Mematikan VM atau LXC Container. Jika graceful=True (default), akan shutdown normal. Jika False, force stop.","parameters":{"properties":{"graceful":{"default":true,"title":"Graceful","type":"boolean"},"vmid":{"title":"Vmid","type":"integer"}},"required":["vmid"],"title":"stop_vmArguments","type":"object"}}

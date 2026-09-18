@@ -1,1 +1,0 @@
-{"name":"ruijie_get_auth_status","description":"Mendapatkan informasi status autentikasi, base URL, mode login, dan sisa masa aktif sesi.\n\nBerguna untuk melihat konfigurasi aktif tanpa mengirim request berlebih ke server Ruijie.\n","parameters":{"properties":{},"title":"ruijie_get_auth_statusArguments","type":"object"}}

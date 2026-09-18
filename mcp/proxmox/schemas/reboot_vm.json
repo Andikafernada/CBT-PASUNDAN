@@ -1,1 +1,0 @@
-{"name":"reboot_vm","description":"Reboot VM atau LXC Container berdasarkan VMID.","parameters":{"properties":{"vmid":{"title":"Vmid","type":"integer"}},"required":["vmid"],"title":"reboot_vmArguments","type":"object"}}

@@ -52,3 +52,7 @@ ecosystem.config.js.bak
 *.bak_*
 *.orig_*
 *.backup
+
+# Infrastructure MCP servers (separate repository)
+mcp/proxmox/
+mcp/ruijie-cloud/

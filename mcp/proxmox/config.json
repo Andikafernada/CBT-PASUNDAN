@@ -1,7 +1,0 @@
-{
-  "host": "172.16.0.177",
-  "port": 8006,
-  "token_id": "root@pam!MCP",
-  "token_secret": "5e50d28f-f380-4357-988c-3a1d8cb4f57e",
-  "verify_ssl": false
-}
